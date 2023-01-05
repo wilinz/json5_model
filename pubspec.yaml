@@ -1,4 +1,4 @@
-name: json_model
+name: json5_model
 description: Gernerating Dart model class from Json files with one command.
 version: 1.0.0
 homepage: https://github.com/flutterchina/json_model
@@ -16,6 +16,7 @@ dependencies:
   build_runner_core: ^7.0.0
   build_runner: ^2.0.0
   path: ^1.8.0
+  json5: ^0.8.0
 dev_dependencies:
   test: ^1.5.1
   lint: ^1.0.0

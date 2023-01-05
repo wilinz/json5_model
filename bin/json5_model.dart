@@ -20,7 +20,7 @@ class Class {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Class && runtimeType == other.runtimeType && name == other.name;
+      other is Class && runtimeType == other.runtimeType && name == other.name;
 
   @override
   int get hashCode => name.hashCode;
@@ -56,7 +56,7 @@ class Field {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Field && runtimeType == other.runtimeType && name == other.name;
+      other is Field && runtimeType == other.runtimeType && name == other.name;
 
   @override
   String toString() {
@@ -100,7 +100,7 @@ const topListTpl = """List<%s> %sListFormJson(List<Map<String, dynamic>> json) =
 List<Map<String, dynamic>> %sListToJson(List<%s> instance) =>
     instance.map((e) => e.toJson()).toList();""";
 
-void run(List<String> args) {
+void main(List<String> args) {
   String? src;
   String? dist;
   String? tag;
@@ -140,11 +140,11 @@ void run(List<String> args) {
 }
 
 bool generateModelClass(
-    String srcDir,
-    String distDir,
-    String tag, {
-      required bool nullable,
-    }) {
+  String srcDir,
+  String distDir,
+  String tag, {
+  required bool nullable,
+}) {
   if (srcDir.endsWith("/")) srcDir = srcDir.substring(0, srcDir.length - 1);
   if (distDir.endsWith("/")) distDir = distDir.substring(0, distDir.length - 1);
 
@@ -172,7 +172,7 @@ bool generateModelClass(
 
       final relative = path.relative(f.path, from: srcDir);
       final dartFilePath =
-      path.join(distDir, path.setExtension(relative, ".dart"));
+          path.join(distDir, path.setExtension(relative, ".dart"));
 
       final json = json5Decode(file.readAsStringSync());
       //generated class name
@@ -237,7 +237,7 @@ bool generateModelClass(
             defaultValue = "false";
           }
           final defaultValueStr =
-          defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
+              defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
 
           constructor.write(constructorField);
           // final late = f.nullable ? "" : "late ";
@@ -428,7 +428,7 @@ void handleFieldsAreNullable(List<dynamic> types, Class class0) {
       for (final field in class1.fields) {
         if (field.type == "Null" || field.nullable) {
           final class0Field =
-          class0.fields.firstWhereOrNull((e) => e.name == field.name);
+              class0.fields.firstWhereOrNull((e) => e.name == field.name);
           class0Field
             ?..nullable = true
             ..type = "Null";
@@ -482,7 +482,7 @@ String exportIndexFile(String exportClassName, bool isList, String p,
     exportStr.write(", ${pre}ListFormJson, ${pre}ListToJson");
   }
   indexFile +=
-  "export '${relative.replaceAll("\\", "/")}' show ${exportStr}; \n";
+      "export '${relative.replaceAll("\\", "/")}' show ${exportStr}; \n";
   return indexFile;
 }
 

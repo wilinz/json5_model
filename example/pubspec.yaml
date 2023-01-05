@@ -6,6 +6,6 @@ environment:
   sdk: ">=2.14.0 <3.0.0"
 
 dev_dependencies:
-  json_model:
+  json5_model:
     path: ../
-  json_serializable: ^5.0.0
+  json_serializable: ^6.5.4
