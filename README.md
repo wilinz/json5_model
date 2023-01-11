@@ -2,7 +2,7 @@
 语言: [English](README.md) | [中文简体](README-ZH.md)
 
 
-# json5_model [![Pub]
+# json5_model
 
 # json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，暂时不支持原版本的json文件@meta功能
 一行命令，将Json文件转为Dart model类。
