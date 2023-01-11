@@ -11,8 +11,10 @@
 
 ```yaml
 dev_dependencies: 
-  json5_model: ^1.0.0
   json_serializable: ^5.0.0
+  json5_model:
+    git:
+      url: https://github.com/wilinz/json5_model.git
 ```
 
 ## 使用
