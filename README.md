@@ -21,7 +21,7 @@ dev_dependencies:
 
 1. 在工程根目录下创建一个名为 "jsons" 的目录;
 2. 创建或拷贝Json文件到"jsons" 目录中 ;
-3. 运行 `pub run json_model` (Dart VM工程)or `flutter packages pub run json_model`(Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
+3. 运行 `pub run json5_model` (Dart VM工程)or `flutter packages pub run json5_model`(Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
 
 ## 思想
 
