@@ -4,7 +4,7 @@
 
 # json_model [![Pub](https://img.shields.io/pub/v/json_model.svg?style=flat-square)](https://pub.dartlang.org/packages/json_model)
 
-#json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，暂时不支持原版本的json文件@meta功能
+# json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，暂时不支持原版本的json文件@meta功能
 一行命令，将Json文件转为Dart model类。
 
 ## 安装
