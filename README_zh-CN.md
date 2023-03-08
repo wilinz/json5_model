@@ -14,9 +14,7 @@ json_model 改进版，支持解析嵌套json,支持json5文件，并修复了�
 ```yaml
 dev_dependencies:
   json_serializable: ^6.5.4
-  json5_model:
-    git:
-      url: https://github.com/wilinz/json5_model.git
+  json5_model: ^1.0.1
 ```
 
 ## 使用
@@ -71,7 +69,7 @@ flutter pub run json5_model --src=lib/data/json
 ```
 
 json:
-```json
+```json5
 {
   "id": 1296269,
   "node_id": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
