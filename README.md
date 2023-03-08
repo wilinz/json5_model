@@ -9,7 +9,7 @@ A one-line command to convert a JSON file into a Dart model class.
 json_model Improved version, supports parsing nested JSON, supports json5 files, and fixes some bugs, does not support the original version of json file @meta function
 
 
-## 安装
+## Install
 
 ```yaml
 dev_dependencies:
@@ -19,7 +19,7 @@ dev_dependencies:
       url: https://github.com/wilinz/json5_model.git
 ```
 
-## usage
+## Usage
 
 1. Create a directory named "jsons" under the project root;
 2. Create or copy a JSON file into the "jsons" directory;
