@@ -52,14 +52,14 @@ The default build directory is "libmodels", and you can also customize the outpu
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
 ```
 
-## 代码调用
+## code call
 
 If you are developing a tool and want to use the JSON Model in your code, you cannot call the JSON Model from the command line, you can call it from code:
 
 ```dart
 import 'package:json_model/json5_model.dart';
 void main() {
-  run(['src=jsons']);  //run方法为json_model暴露的方法；
+  run(['src=jsons']);  //The run method is the method exposed by the json5_model；
 }
 ```
 
