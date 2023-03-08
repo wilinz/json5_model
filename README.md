@@ -1,51 +1,52 @@
 
-语言: [English](README.md) | [中文简体](README-ZH.md)
+Language: [English](README.md) | [中文简体](README_zh-CN.md)
 
 
 # json5_model
 
-# json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，不支持原版本的json文件@meta功能
-一行命令，将Json文件转为Dart model类。
+A one-line command to convert a JSON file into a Dart model class.  
+
+json_model Improved version, supports parsing nested JSON, supports json5 files, and fixes some bugs, does not support the original version of json file @meta function
+
 
 ## 安装
 
 ```yaml
-dev_dependencies: 
-  json_serializable: ^5.0.0
+dev_dependencies:
+  json_serializable: ^6.5.4
   json5_model:
     git:
       url: https://github.com/wilinz/json5_model.git
 ```
 
-## 使用
+## usage
 
-1. 在工程根目录下创建一个名为 "jsons" 的目录;
-2. 创建或拷贝Json文件到"jsons" 目录中 ;
-3. 运行 `pub run json5_model` (Dart VM工程)or `flutter packages pub run json5_model`(Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
+1. Create a directory named "jsons" under the project root;
+2. Create or copy a JSON file into the "jsons" directory;
+3. Run the 'pub run json5_model' (Dart VM project) or 'flutter packages pub run json5_model' (in Flutter) command to generate the Dart model class, and the generated files are in the "libmodels" directory by default
+## Thought
 
-## 思想
+Most developers probably use UI tools to generate Dart model classes from JSON files. There is a small problem with this, once the Dart model class is generated, the raw JSON data will not be maintained, but there will be an occasional need to view the original JSON data in real development. The main idea of json_model is that the project only maintains the JSON file, without paying attention to the generated DART file, as long as the JSON file is there, you can generate the DART class at any time through a command.
 
-大多数开发者可能都是通过UI工具来将Json文件来生成Dart model类。这会有一个小问题，一旦生成Dart model类后，原始的json数据是不会维护的，但现实开发中偶尔会有查看原始Json数据的需求。json_model的主要思路就是项目中**只维护json文件，而不用去关注生成的dart文件，只要json文件在，随时都可以通过一句命令生成dart类**。
+Another advantage of json5_model is that in projects where multiple people collaborate, they can be integrated into the build process without everyone having to install a conversion tool.
 
-json5_model 还有一个优势是在多人协作的项目中，可以集成到构建流程中，无需每个人都去安装一个转换工具。
+Of course, this is just a small difference, if you prefer the way the UI tools do, just do it the way you like.
 
-当然，这只是一个小差异，如果你更喜欢UI工具的方式，按照自己喜欢的方式来就行。
+> For details of the '@JsonKey' annotation, please refer to the [json_annotation](https:pub.devpackagesjson_annotation) package;
 
-> 关于 `@JsonKey`标注的详细内容请参考[json_annotation](https://pub.dev/packages/json_annotation) 包；
+## Avoid Overwriting
 
-## 避免覆盖
+Rename the JSON file to the beginning of the underscore to ignore this file, so that the JSON file will be skipped when re-executing the auto-generation, e.g. 'response.json' to '_response.json'
 
-重命名json文件为下划线开头以忽略此文件，这样重新执行自动生成时会跳过该json文件，如`response.json`重命名为`_response.json`
+##  Global command parameters
 
-##  全局命令参数
-
-默认的源json文件目录为根目录下名为 "jsons" 的目录；可以通过 `src` 参数自定义源json文件目录，例如:
+The default source json file directory is a directory named "jsons" in the root directory; You can customize the source json file directory with the 'src' parameter, for example:
 
 ```shell
 flutter pub run json5_model --src=lib/data/json
 ```
 
-默认的生成目录为"lib/models"，同样也可以通过`dist` 参数来自定义输出目录:
+The default build directory is "libmodels", and you can also customize the output directory with the 'dist' parameter:
 
 ```shell
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
@@ -53,7 +54,7 @@ flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
 
 ## 代码调用
 
-如果您正在开发一个工具，想在代码中使用json_model，此时便不能通过命令行来调用json_model，这是你可以通过代码调用：
+If you are developing a tool and want to use the JSON Model in your code, you cannot call the JSON Model from the command line, you can call it from code:
 
 ```dart
 import 'package:json_model/json5_model.dart';
