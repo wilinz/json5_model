@@ -150,7 +150,7 @@ bool generateModelClass(
 
   final src = Directory(srcDir);
   final fileList = src.listSync(recursive: true);
-  String indexFile = "";
+  // String indexFile = "";
   if (fileList.isEmpty) return false;
   if (!Directory(distDir).existsSync()) {
     Directory(distDir).createSync(recursive: true);
@@ -278,19 +278,19 @@ bool generateModelClass(
       File(dartFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(dist);
-      indexFile = exportIndexFile(
-          className, json is List, dartFilePath, distDir, indexFile);
+      // indexFile = exportIndexFile(
+      //     className, json is List, dartFilePath, distDir, indexFile);
       print('done: ${f.path} -> $dartFilePath');
     }
   });
-  if (indexFile.isNotEmpty) {
-    final p = path.join(distDir, "index.dart");
-    File(p).writeAsStringSync(indexFile);
-    print('create index file: $p');
-  }
+  // if (indexFile.isNotEmpty) {
+  //   final p = path.join(distDir, "index.dart");
+  //   File(p).writeAsStringSync(indexFile);
+  //   print('create index file: $p');
+  // }
   print("src directory：" + path.canonicalize(srcDir));
   print("dist directory：" + path.canonicalize(distDir));
-  return indexFile.isNotEmpty;
+  return true;
 }
 
 extension StringExt on String {
