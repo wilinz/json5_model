@@ -2,24 +2,26 @@
 语言: [English](README.md) | [中文简体](README-ZH.md)
 
 
-# json_model [![Pub](https://img.shields.io/pub/v/json_model.svg?style=flat-square)](https://pub.dartlang.org/packages/json_model)
+# json5_model
 
-#json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，暂时不支持原版本的json文件@meta功能
+# json_model 改进版，支持解析嵌套json,支持json5文件，并修复了一些Bug，暂时不支持原版本的json文件@meta功能
 一行命令，将Json文件转为Dart model类。
 
 ## 安装
 
 ```yaml
 dev_dependencies: 
-  json5_model: ^1.0.0
   json_serializable: ^5.0.0
+  json5_model:
+    git:
+      url: https://github.com/wilinz/json5_model.git
 ```
 
 ## 使用
 
 1. 在工程根目录下创建一个名为 "jsons" 的目录;
 2. 创建或拷贝Json文件到"jsons" 目录中 ;
-3. 运行 `pub run json_model` (Dart VM工程)or `flutter packages pub run json_model`(Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
+3. 运行 `pub run json5_model` (Dart VM工程)or `flutter packages pub run json5_model`(Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
 
 ## 思想
 
@@ -31,20 +33,22 @@ json_model还有一个优势是在多人协作的项目中，可以集成到构�
 
 > 关于 `@JsonKey`标注的详细内容请参考[json_annotation](https://pub.dev/packages/json_annotation) 包；
 
-> `ignore` 配置在“需要手动修改自动生成的代码”的场景下非常实用。比如在首次生成之后dart文件后，如果我们需要添加一些逻辑，比如给model类添加了一个方法，如果后续再运行自动生成命令，则我们修改的类会被重新生成的代码覆盖掉，解决这个问题的方式就是修改后将ignore置为true，这样重新执行自动生成时会跳过该json文件。
+## 避免覆盖
+
+`ignore` 配置在“需要手动修改自动生成的代码”的场景下非常实用。比如在首次生成之后dart文件后，如果我们需要添加一些逻辑，比如给model类添加了一个方法，如果后续再运行自动生成命令，则我们修改的类会被重新生成的代码覆盖掉，~解决这个问题的方式就是修改后将ignore置为true~，这样重新执行自动生成时会跳过该json文件。*__目前此修改版本不支持`ignore` 配置，但可以重命名json文件为下划线开头以忽略此文件，这样重新执行自动生成时会跳过该json文件，如`response.json`重命名为`_response.json`__*
 
 ##  全局命令参数
 
-默认的源json文件目录为根目录下名为 "json" 的目录；可以通过 `src` 参数自定义源json文件目录，例如:
+默认的源json文件目录为根目录下名为 "jsons" 的目录；可以通过 `src` 参数自定义源json文件目录，例如:
 
 ```shell
-flutter pub run json5_model --src=jsons
+flutter pub run json5_model --src=jsons1
 ```
 
 默认的生成目录为"lib/models"，同样也可以通过`dist` 参数来自定义输出目录:
 
 ```shell
-flutter pub run json5_model --src=jsons --dist=lib/test/test1
+flutter pub run json5_model --src=jsons1 --dist=lib/test/test1
 ```
 
 ## 代码调用
