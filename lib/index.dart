@@ -20,7 +20,7 @@ class Class {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Class && runtimeType == other.runtimeType && name == other.name;
+      other is Class && runtimeType == other.runtimeType && name == other.name;
 
   @override
   int get hashCode => name.hashCode;
@@ -56,7 +56,7 @@ class Field {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Field && runtimeType == other.runtimeType && name == other.name;
+      other is Field && runtimeType == other.runtimeType && name == other.name;
 
   @override
   String toString() {
@@ -94,18 +94,20 @@ class %s {
 
 """;
 
-const topListTpl = """List<%s> %sListFormJson(List<Map<String, dynamic>> json) =>
+const topListTpl =
+    """List<%s> %sListFormJson(List<Map<String, dynamic>> json) =>
     json.map((e) => %s.fromJson(e)).toList();
 
 List<Map<String, dynamic>> %sListToJson(List<%s> instance) =>
     instance.map((e) => e.toJson()).toList();""";
 
-void run(List<String> args) {
+Future<void> run(List<String> args) async {
   String? src;
   String? dist;
   String? tag;
   bool nullable = false;
   bool clean = false;
+  bool once = true;
   final parser = ArgParser();
   parser.addOption(
     'src',
@@ -119,7 +121,12 @@ void run(List<String> args) {
     callback: (v) => dist = v,
     help: "Specify the dist directory.",
   );
-
+  parser.addOption(
+    'once',
+    defaultsTo: "true",
+    callback: (v) => once = (v != 'false'),
+    help: "Automatically rename the JSON file to start with '_' after build",
+  );
   parser.addOption(
     'tag',
     defaultsTo: '\$',
@@ -134,17 +141,37 @@ void run(List<String> args) {
   // return;
   if (clean) {
     br.run(['clean']);
-  } else if (generateModelClass(src!, dist!, tag!, nullable: nullable)) {
-    br.run(['build', '--delete-conflicting-outputs']);
+  } else {
+    var files = <String>[];
+    final isGenerated = generateModelClass(src!, dist!, tag!,
+        nullable: nullable, once: once, onGenerate: (f) { files = f;});
+    if (isGenerated) {
+      await br.run(['build', '--delete-conflicting-outputs']);
+      final all = files.map((e) => path.join(path.dirname(e), '*'));
+      Process.run('git', [
+        'add',
+        ...all
+      ]).then((ProcessResult result) {
+        if (result.exitCode == 0) {
+          print('git add succeed');
+        } else {
+          print('git add fail');
+        }
+      }).catchError((error) {
+        print('git add fail: $error');
+      });
+    }
   }
 }
 
 bool generateModelClass(
-    String srcDir,
-    String distDir,
-    String tag, {
-      required bool nullable,
-    }) {
+  String srcDir,
+  String distDir,
+  String tag, {
+  required bool nullable,
+  required bool once,
+  Function(List<String> allGeneratedFiles)? onGenerate
+}) {
   if (srcDir.endsWith("/")) srcDir = srcDir.substring(0, srcDir.length - 1);
   if (distDir.endsWith("/")) distDir = distDir.substring(0, distDir.length - 1);
 
@@ -157,6 +184,7 @@ bool generateModelClass(
   }
 
   File file;
+  List<String> allGeneratedFiles = List.empty(growable: true);
 
   fileList.forEach((f) {
     if (FileSystemEntity.isFileSync(f.path)) {
@@ -171,8 +199,12 @@ bool generateModelClass(
       if ((!isJson && !isJson5) || fileName.startsWith("_")) return;
 
       final relative = path.relative(f.path, from: srcDir);
-      final dartFilePath =
-      path.join(distDir, path.setExtension(relative, ".dart"));
+      var dartFilePath =
+          path.join(distDir, path.setExtension(relative, ".dart"));
+      dartFilePath = path.join(
+          path.dirname(dartFilePath),
+          path.basenameWithoutExtension(dartFilePath),
+          path.basename(dartFilePath));
 
       final json = json5Decode(file.readAsStringSync());
       //generated class name
@@ -237,7 +269,7 @@ bool generateModelClass(
             defaultValue = "false";
           }
           final defaultValueStr =
-          defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
+              defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
 
           constructor.write(constructorField);
           // final late = f.nullable ? "" : "late ";
@@ -278,6 +310,29 @@ bool generateModelClass(
       File(dartFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(dist);
+
+      var sourceFilePath = file.path;
+      if (once) {
+        final newName = "_" + path.basename(file.path);
+        sourceFilePath = path.join(file.parent.path, newName);
+        file.renameSync(sourceFilePath);
+      }
+
+      allGeneratedFiles.add(dartFilePath);
+
+      Process.run('git', [
+        'add',
+        sourceFilePath
+      ]).then((ProcessResult result) {
+        if (result.exitCode == 0) {
+          print('git add succeed');
+        } else {
+          print('git add fail');
+        }
+      }).catchError((error) {
+        print('git add fail: $error');
+      });
+
       // indexFile = exportIndexFile(
       //     className, json is List, dartFilePath, distDir, indexFile);
       print('done: ${f.path} -> $dartFilePath');
@@ -290,6 +345,7 @@ bool generateModelClass(
   // }
   print("src directory：" + path.canonicalize(srcDir));
   print("dist directory：" + path.canonicalize(distDir));
+  onGenerate?.call(allGeneratedFiles);
   return true;
 }
 
@@ -428,7 +484,7 @@ void handleFieldsAreNullable(List<dynamic> types, Class class0) {
       for (final field in class1.fields) {
         if (field.type == "Null" || field.nullable) {
           final class0Field =
-          class0.fields.firstWhereOrNull((e) => e.name == field.name);
+              class0.fields.firstWhereOrNull((e) => e.name == field.name);
           class0Field
             ?..nullable = true
             ..type = "Null";
@@ -482,7 +538,7 @@ String exportIndexFile(String exportClassName, bool isList, String p,
     exportStr.write(", ${pre}ListFormJson, ${pre}ListToJson");
   }
   indexFile +=
-  "export '${relative.replaceAll("\\", "/")}' show ${exportStr}; \n";
+      "export '${relative.replaceAll("\\", "/")}' show ${exportStr}; \n";
   return indexFile;
 }
 

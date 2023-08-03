@@ -1,3 +1,7 @@
+## [2.0.0] - 2023.8.3
+* Automatically rename source files starting with '_' (optional)
+* Each JSON-generated file is placed in a separate folder
+* Automate git add
 
 ## [1.0.0]
 * release version
