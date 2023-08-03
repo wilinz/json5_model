@@ -14,7 +14,7 @@ json_model 改进版，支持解析嵌套json,支持json5文件，并修复了�
 ```yaml
 dev_dependencies:
   json_serializable: ^6.7.1
-  json5_model: ^2.0.0
+  json5_model: ^2.0.1
 ```
 
 ## 使用
@@ -35,7 +35,7 @@ json5_model 还有一个优势是在多人协作的项目中，可以集成到�
 
 ## 避免覆盖
 
-此程序大于 1.0.2 的版本会在转换成功后自动重命名json文件为 '_' 开头以忽略此文件，这样重新执行自动生成时会跳过该json文件，如`response.json`重命名为`_response.json`, 如果你不想自动重命名，请添加 --once=false 参数
+此程序大于 2.0.0 的版本会在转换成功后自动重命名json文件为 '_' 开头以忽略此文件，这样重新执行自动生成时会跳过该json文件，如`response.json`重命名为`_response.json`, 如果你不想自动重命名，请添加 --once=false 参数
 
 ##  全局命令参数
 

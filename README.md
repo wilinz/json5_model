@@ -14,7 +14,7 @@ json_model Improved version, supports parsing nested JSON, supports json5 files,
 ```yaml
 dev_dependencies:
   json_serializable: ^6.7.1
-  json5_model: ^2.0.0
+  json5_model: ^2.0.1
 ```
 
 ## Usage
@@ -34,7 +34,7 @@ Of course, this is just a small difference, if you prefer the way the UI tools d
 
 ## Avoid Overwriting
 
-The version of this program greater than 1.0.2 will automatically rename the json file to start with '_' after successful conversion to ignore this file, so that the json file will be skipped when re-executing the automatic generation, such as 'response.json' renamed to '_response.json', if you don't want to rename automatically, please add the --once=false parameter
+The version of this program greater than 2.0.0 will automatically rename the json file to start with '_' after successful conversion to ignore this file, so that the json file will be skipped when re-executing the automatic generation, such as 'response.json' renamed to '_response.json', if you don't want to rename automatically, please add the --once=false parameter
 
 ##  Global command parameters
 

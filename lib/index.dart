@@ -275,7 +275,7 @@ bool generateModelClass(
           // final late = f.nullable ? "" : "late ";
           fieldsStr
               .write("  @JsonKey(name: \"${f.rawName}\"$defaultValueStr)\n");
-          fieldsStr.write("  ${f.type} ${f.name};\n");
+          fieldsStr.write("  ${f.type} ${f.name};\n\n");
           i++;
         });
         var constructorStr = constructor.toString();

@@ -1,3 +1,6 @@
+## [2.0.1] - 2023.8.3
+* Fields are spaced one line apart
+
 ## [2.0.0] - 2023.8.3
 * Automatically rename source files starting with '_' (optional)
 * Each JSON-generated file is placed in a separate folder
