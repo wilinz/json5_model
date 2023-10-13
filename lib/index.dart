@@ -95,8 +95,8 @@ class %s {
 """;
 
 const topListTpl =
-    """List<%s> %sListFormJson(List<Map<String, dynamic>> json) =>
-    json.map((e) => %s.fromJson(e)).toList();
+    """List<%s> %sListFormJson(List json) =>
+    json.map((e) => %s.fromJson(e as Map<String, dynamic>)).toList();
 
 List<Map<String, dynamic>> %sListToJson(List<%s> instance) =>
     instance.map((e) => e.toJson()).toList();""";

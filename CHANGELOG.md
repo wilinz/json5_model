@@ -1,3 +1,6 @@
+## [2.0.2] - 2023.10.14
+* Fix the top-level xxxListFormJson(List json) function
+
 ## [2.0.1] - 2023.8.3
 * Fields are spaced one line apart
 
