@@ -14,7 +14,7 @@ json_model 改进版，支持解析嵌套json,支持json5文件，并修复了�
 ```yaml
 dev_dependencies:
   json_serializable: ^6.7.1
-  json5_model: ^2.0.1
+  json5_model: ^2.0.3
 ```
 
 ## 使用

@@ -14,7 +14,7 @@ json_model Improved version, supports parsing nested JSON, supports json5 files,
 ```yaml
 dev_dependencies:
   json_serializable: ^6.7.1
-  json5_model: ^2.0.1
+  json5_model: ^2.0.3
 ```
 
 ## Usage
