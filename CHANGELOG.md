@@ -1,5 +1,5 @@
 ## [2.1.0] - 2024.4.22
-* 为每个生成的对象增加 emptyInstance 工厂构造函数并设为默认值
+* Add `emptyInstance` factory constructor to each generated object and set it as default value
 
 ## [2.0.3] - 2023.10.14
 * Update readme.md
