@@ -5,6 +5,9 @@ version: 0.0.1
 environment:
   sdk: ">=2.15.0 <3.0.0"
 
+dependencies:
+  json_annotation: ^4.8.1
+
 dev_dependencies:
   json5_model:
     path: ../
