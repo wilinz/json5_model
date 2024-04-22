@@ -1,3 +1,6 @@
+## [2.1.1] - 2024.4.22
+* Fix empty judgment and List judgment wilinz 5 minutes ago
+
 ## [2.1.0] - 2024.4.22
 * Add `emptyInstance` factory constructor to each generated object and set it as default value
 
