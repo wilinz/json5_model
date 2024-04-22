@@ -301,7 +301,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
               break;
             default:
               if (f.type.startsWith("List<")) {
-                defaultValue = "const []";
+                defaultValue = "[]";
               } else {
                 // 对于复杂类型，我们假设它们有一个名为 `emptyInstance` 的工厂构造函数
                 defaultValue = "${f.type.replaceAll("?", "")}.emptyInstance()";
