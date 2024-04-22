@@ -84,12 +84,15 @@ part '%s.g.dart';
 """;
 const tpl = """@JsonSerializable(explicitToJson: true)
 class %s {
+
   %s
 
 %s
   factory %s.fromJson(Map<String, dynamic> json) => _\$%sFromJson(json);
-
+  
   Map<String, dynamic> toJson() => _\$%sToJson(this);
+  
+  factory %s.emptyInstance() => %s(%s);
 }
 
 """;
@@ -253,7 +256,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           final pad = i == 0 ? "" : "      ";
           final constructorField = "${pad}${required}this.${f.name},\n";
 
-          String? defaultValue = null;
+          String? defaultValue;
           if (f.type == "String") {
             defaultValue = "\"\"";
           } else if (f.type == "int") {
@@ -264,6 +267,8 @@ bool generateModelClass(String srcDir, String distDir, String tag,
             defaultValue = "[]";
           } else if (f.type == "bool") {
             defaultValue = "false";
+          } else if (!f.type.contains("?")){
+            defaultValue = "${f.type}.emptyInstance";
           }
           final defaultValueStr =
               defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
@@ -278,6 +283,40 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         var constructorStr = constructor.toString();
         constructorStr =
             constructorStr.substring(0, constructorStr.length - 2) + "});";
+
+        // 构建构造函数默认参数
+        final defaultValuesStr = StringBuffer();
+        c.fields.forEach((f) {
+          String defaultValue;
+          switch (f.type.replaceAll("?", "")) { // 移除可空标记以简化类型匹配
+            case "String":
+              defaultValue = '""';
+              break;
+            case "int":
+            case "double":
+              defaultValue = "0";
+              break;
+            case "bool":
+              defaultValue = "false";
+              break;
+            default:
+              if (f.type.startsWith("List<")) {
+                defaultValue = "const []";
+              } else {
+                // 对于复杂类型，我们假设它们有一个名为 `emptyInstance` 的工厂构造函数
+                defaultValue = "${f.type.replaceAll("?", "")}.emptyInstance()";
+              }
+              break;
+          }
+          if (!f.nullable) {
+            defaultValuesStr.write("${f.name}: $defaultValue, ");
+          }
+        });
+
+        // 移除最后的逗号和空格
+        var defaultValues = defaultValuesStr.toString().replaceAll(RegExp(r", $"), "");
+
+        // 使用新的占位符值调用 replaceTemplate
         classesStr.write(replaceTemplate(tpl, [
           c.name,
           constructorStr,
@@ -285,7 +324,11 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           c.name,
           c.name,
           c.name,
+          c.name, // 新增：用于emptyInstance的类名
+          c.name, // 新增：用于emptyInstance的构造函数调用
+          defaultValues, // 新增：构造函数的默认参数
         ]));
+
       });
 
       String topListFunction = "";

@@ -9,16 +9,21 @@ part of 'github.dart';
 Github _$GithubFromJson(Map<String, dynamic> json) => Github(
       id: json['id'] as int? ?? 0,
       nodeId: json['node_id'] as String? ?? '',
-      owner: Owner.fromJson(json['owner'] as Map<String, dynamic>),
+      owner: json['owner'] == null
+          ? Owner.emptyInstance()
+          : Owner.fromJson(json['owner'] as Map<String, dynamic>),
       private: json['private'] as bool? ?? false,
       topics: (json['topics'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      permissions:
-          Permissions.fromJson(json['permissions'] as Map<String, dynamic>),
-      securityAndAnalysis: SecurityAndAnalysis.fromJson(
-          json['security_and_analysis'] as Map<String, dynamic>),
+      permissions: json['permissions'] == null
+          ? Permissions.emptyInstance()
+          : Permissions.fromJson(json['permissions'] as Map<String, dynamic>),
+      securityAndAnalysis: json['security_and_analysis'] == null
+          ? SecurityAndAnalysis.emptyInstance()
+          : SecurityAndAnalysis.fromJson(
+              json['security_and_analysis'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$GithubToJson(Github instance) => <String, dynamic>{
@@ -86,12 +91,19 @@ Map<String, dynamic> _$SecretScanningPushProtectionToJson(
 
 SecurityAndAnalysis _$SecurityAndAnalysisFromJson(Map<String, dynamic> json) =>
     SecurityAndAnalysis(
-      advancedSecurity: AdvancedSecurity.fromJson(
-          json['advanced_security'] as Map<String, dynamic>),
-      secretScanning: SecretScanning.fromJson(
-          json['secret_scanning'] as Map<String, dynamic>),
-      secretScanningPushProtection: SecretScanningPushProtection.fromJson(
-          json['secret_scanning_push_protection'] as Map<String, dynamic>),
+      advancedSecurity: json['advanced_security'] == null
+          ? AdvancedSecurity.emptyInstance()
+          : AdvancedSecurity.fromJson(
+              json['advanced_security'] as Map<String, dynamic>),
+      secretScanning: json['secret_scanning'] == null
+          ? SecretScanning.emptyInstance()
+          : SecretScanning.fromJson(
+              json['secret_scanning'] as Map<String, dynamic>),
+      secretScanningPushProtection: json['secret_scanning_push_protection'] ==
+              null
+          ? SecretScanningPushProtection.emptyInstance()
+          : SecretScanningPushProtection.fromJson(
+              json['secret_scanning_push_protection'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SecurityAndAnalysisToJson(
