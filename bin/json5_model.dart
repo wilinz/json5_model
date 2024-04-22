@@ -263,11 +263,11 @@ bool generateModelClass(String srcDir, String distDir, String tag,
             defaultValue = "0";
           } else if (f.type == "double") {
             defaultValue = "0.0";
-          } else if (f.type.startsWith("List<")) {
+          } else if (f.type == 'List' || f.type.startsWith("List<")) {
             defaultValue = "[]";
           } else if (f.type == "bool") {
             defaultValue = "false";
-          } else if (!f.type.contains("?")){
+          } else if (!f.nullable){
             defaultValue = "${f.type}.emptyInstance";
           }
           final defaultValueStr =
@@ -300,7 +300,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
               defaultValue = "false";
               break;
             default:
-              if (f.type.startsWith("List<")) {
+              if (f.type == 'List' || f.type.startsWith("List<")) {
                 defaultValue = "[]";
               } else {
                 // 对于复杂类型，我们假设它们有一个名为 `emptyInstance` 的工厂构造函数
