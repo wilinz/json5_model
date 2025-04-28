@@ -615,12 +615,13 @@ Field handleList(List<Class> classes, String name, List list) {
     types.add(type);
   });
 
-  if (types.isEmpty) return Field("List<dynamic>", name, name, true, true);
+  if (types.isEmpty) return Field("List", name, name, true, true);
 
   // 处理所有元素都是 Map 的情况
-  final allMaps = types.every((t) => t is Class);
+  final allMaps = types.every((t) => t is Class || t == "Null");
+  final nullable = types.any((t) => t == "Null");
   if (allMaps) {
-    final classList = types.cast<Class>();
+    final classList = types.where((e) => e is Class).cast<Class>();
     final mergedClassName =
         '${name.underlineToHumpNaming(true)}Item'.safeName();
 
@@ -648,7 +649,7 @@ Field handleList(List<Class> classes, String name, List list) {
 
       // 处理可空性：字段不存在于所有 Map 中，或任一值为 null
       final existsInAll = existingFields.length == classList.length;
-      final hasNullValue = list.any((item) {
+      final hasNullValue = list.where((e) => e != null).any((item) {
         final map = item as Map<String, dynamic>;
         return !map.containsKey(fieldName) || map[fieldName] == null;
       });
@@ -665,7 +666,7 @@ Field handleList(List<Class> classes, String name, List list) {
     final mergedClass = Class(mergedClassName, mergedClassName, mergedFields);
     classes.add(mergedClass);
     return ListField(
-        "List<${mergedClass.name}>", mergedClass.name, name, true, false);
+        "List<${mergedClass.name}>", mergedClass.name, name, true, nullable);
   }
 
   // 处理基本类型列表
