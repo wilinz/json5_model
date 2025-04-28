@@ -1,3 +1,36 @@
+## [3.0.0] - 2025-4-29
+
+### Added
+- **Enhanced List Processing**:
+    - Smart merging of Map fields within Lists
+    - Automatic type conversion between `double`/`int`/`null` in Lists
+    - Improved handling of mixed-type List elements
+- New `--restore` flag to recover renamed JSON files
+- `--keepsource` option to preserve original JSON files
+- Enhanced type inference system
+- Automatic null safety handling
+- Support for `equatable` and `copy_with_extension` packages
+- Better handling of empty JSON objects `{}`
+
+### Fixed
+- **List type inference** now more accurate for:
+    - Nullable elements (`List<Type?>`)
+    - Mixed numeric types (`int`/`double`/`null`)
+    - Nested object structures
+- Issue with numeric type promotion
+- Bug in nested list handling
+- Path resolution problems on Windows systems
+- List processor implementation
+- Dart Keyword conflicts in generated code
+- Generation errors with empty JSON objects
+- README documentation updates
+
+### Changed
+- Improved error handling for malformed JSON
+- Optimized code generation performance
+- Restructured command line interface
+- Sync with vei origin & master branches
+
 ## [2.1.1] - 2024.4.22
 * Fix empty judgment and List judgment wilinz 5 minutes ago
 
