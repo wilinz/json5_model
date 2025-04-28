@@ -27,7 +27,17 @@ dev_dependencies:
 
 1. 在工程根目录下创建一个名为 "jsons" 的目录
 2. 创建或拷贝Json文件到"jsons" 目录中
-3. 运行 `dart pub run json5_model` (Dart VM工程) 或 `flutter pub run json5_model` (Flutter中) 命令生成Dart model类，生成的文件默认在"lib/models"目录下
+3. 例子:
+```shell
+# 自定义路径
+flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
+
+# 保留源文件
+flutter pub run json5_model --src=lib/data/json --dist=lib/data/model --keepsource
+
+# 还原文件
+flutter pub run json5_model --src=lib/data/json --restore
+```
 
 ## 新功能
 
@@ -54,18 +64,6 @@ flutter pub run json5_model --keepsource
 | `--keepsource`| 生成后保留原始JSON文件（不添加_前缀）                                 | false         |
 | `--restore`   | 恢复所有被重命名的JSON文件                                           | false         |
 | `--clean`     | 清理生成的文件                                                       | false         |
-
-示例：
-```shell
-# 自定义路径
-flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
-
-# 保留源文件
-flutter pub run json5_model --keepsource
-
-# 恢复文件
-flutter pub run json5_model --restore
-```
 
 ## 工作机制
 

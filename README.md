@@ -27,7 +27,17 @@ dev_dependencies:
 
 1. Create a directory named "jsons" in your project root
 2. Create or copy JSON files into the "jsons" directory
-3. Run `dart pub run json5_model` (for Dart VM projects) or `flutter pub run json5_model` (for Flutter projects) to generate Dart model classes. Generated files will be placed in "lib/models" by default
+3. Examples:
+```shell
+# Custom paths
+flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
+
+# Keep source files
+flutter pub run json5_model --src=lib/data/json --dist=lib/data/model --keepsource
+
+# Restore files
+flutter pub run json5_model --src=lib/data/json --restore
+```
 
 ## New Features
 
@@ -54,18 +64,6 @@ flutter pub run json5_model --keepsource
 | `--keepsource` | Keep original JSON files (don't add _ prefix) after generation   | false         |
 | `--restore`    | Restore all renamed JSON files                                   | false         |
 | `--clean`      | Clean generated files                                            | false         |
-
-Examples:
-```shell
-# Custom paths
-flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
-
-# Keep source files
-flutter pub run json5_model --keepsource
-
-# Restore files
-flutter pub run json5_model --restore
-```
 
 ## How It Works
 
