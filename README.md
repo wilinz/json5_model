@@ -1,15 +1,12 @@
-
-Language: [English](README.md) | [中文简体](README_zh-CN.md)
-
+Language: [English](README.md) | [简体中文](README-ZH.md)
 
 # json5_model
 
-A one-line command to convert a JSON file into a Dart model class.  
+Convert JSON files to Dart model classes with a single command  
 
-json_model Improved version, supports parsing nested JSON, supports json5 files, and fixes some bugs, does not support the original version of json file @meta function
+An improved version of json_model that supports nested JSON parsing, JSON5 files, and fixes several bugs. Note: The original @meta functionality from json_model is not supported.
 
-
-## Install
+## Installation
 
 ```yaml
 dependencies:
@@ -23,53 +20,134 @@ dev_dependencies:
   json_serializable: ^6.9.5
   autoequal_gen: ^0.9.5
   copy_with_extension_gen: ^6.0.1
+  build_runner: ^2.4.15
 ```
 
 ## Usage
 
-1. Create a directory named "jsons" under the project root;
-2. Create or copy a JSON file into the "jsons" directory;
-3. Run the 'pub run json5_model' (Dart VM project) or 'flutter packages pub run json5_model' (in Flutter) command to generate the Dart model class, and the generated files are in the "libmodels" directory by default
-## Thought
+1. Create a directory named "jsons" in your project root
+2. Create or copy JSON files into the "jsons" directory
+3. Run `dart pub run json5_model` (for Dart VM projects) or `flutter pub run json5_model` (for Flutter projects) to generate Dart model classes. Generated files will be placed in "lib/models" by default
 
-Most developers probably use UI tools to generate Dart model classes from JSON files. There is a small problem with this, once the Dart model class is generated, the raw JSON data will not be maintained, but there will be an occasional need to view the original JSON data in real development. The main idea of json_model is that the project only maintains the JSON file, without paying attention to the generated DART file, as long as the JSON file is there, you can generate the DART class at any time through a command.
+## New Features
 
-Another advantage of json5_model is that in projects where multiple people collaborate, they can be integrated into the build process without everyone having to install a conversion tool.
-
-Of course, this is just a small difference, if you prefer the way the UI tools do, just do it the way you like.
-
-> For details of the '@JsonKey' annotation, please refer to the [json_annotation](https:pub.devpackagesjson_annotation) package;
-
-## Avoid Overwriting
-
-The version of this program greater than 2.0.0 will automatically rename the json file to start with '_' after successful conversion to ignore this file, so that the json file will be skipped when re-executing the automatic generation, such as 'response.json' renamed to '_response.json', if you don't want to rename automatically, please add the --once=false parameter
-
-##  Global command parameters
-
-The default source json file directory is a directory named "jsons" in the root directory; You can customize the source json file directory with the 'src' parameter, for example:
-
+### File Restoration Command
+Use the `--restore` parameter to restore all renamed JSON files:
 ```shell
-flutter pub run json5_model --src=lib/data/json
+flutter pub run json5_model --restore
 ```
 
-The default build directory is "libmodels", and you can also customize the output directory with the 'dist' parameter:
-
+### Keep Source Files
+Add the `--keepsource` parameter to prevent automatic renaming of JSON files:
 ```shell
+flutter pub run json5_model --keepsource
+```
+
+## Global Command Parameters
+
+| Parameter      | Description                                                      | Default Value |
+|----------------|------------------------------------------------------------------|---------------|
+| `--src`        | Specify JSON source directory                                    | ./jsons       |
+| `--dist`       | Specify output directory                                         | lib/models    |
+| `--nocopywith` | Disable copyWith method generation                               | false         |
+| `--noautoequal`| Disable equality comparison generation                           | false         |
+| `--keepsource` | Keep original JSON files (don't add _ prefix) after generation   | false         |
+| `--restore`    | Restore all renamed JSON files                                   | false         |
+| `--clean`      | Clean generated files                                            | false         |
+
+Examples:
+```shell
+# Custom paths
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
+
+# Keep source files
+flutter pub run json5_model --keepsource
+
+# Restore files
+flutter pub run json5_model --restore
 ```
 
-## code call
+## How It Works
 
-If you are developing a tool and want to use the JSON Model in your code, you cannot call the JSON Model from the command line, you can call it from code:
+1. **Smart Type Inference**  
+   Automatically detects and merges these type characteristics:
+    - Numeric type promotion (int → double)
+    - Handles nested objects and lists
+    - Automatic null safety handling
+    - Merges fields from multiple JSON structures
 
-```dart
-import 'package:json_model/json5_model.dart';
-void main() {
-  run(['src=jsons']);  //The run method is the method exposed by the json5_model；
+2. **File Management**
+    - By default adds "_" prefix to source JSON files after generation (can be disabled with `--keepsource`)
+    - Use `--restore` to batch restore renamed files
+
+3. **Advanced Features**
+   ```dart
+   // Auto-generated extension methods
+   List<Github> githubListFormJson(List json) => ... 
+   
+   // Empty object construction
+   factory Github.emptyInstance() => Github(...);
+   
+   // Deep copy support
+   Github newObj = oldObj.copyWith(id: 123);
+   ```
+
+## Example JSON → Dart Conversion
+
+Input JSON:
+```json5
+{
+  "scores": [90, 85.5, null],
+  "users": [
+    {"name": "Alice", "age": 25},
+    {"name": "Bob", "height": 175.5}
+  ]
 }
 ```
 
-Example:
+Generated Dart snippet:
+```dart
+// Automatic numeric type and nullable handling
+List<double?> scores;
+
+// Merges Map fields from different structures
+class UsersItem {
+  String? name;
+  int? age;
+  double? height;
+  
+  factory UsersItem.fromJson(Map<String, dynamic> json) => ...
+}
+```
+
+## Best Practices
+
+1. **Version Control**  
+   Recommend including original JSON files in version control (with proper data sanitization)
+
+2. **CI Integration**  
+   Add generation command to your CI pipeline:
+   ```yaml
+   # GitHub Actions example
+   - name: Generate models
+     run: flutter pub run json5_model
+   ```
+
+3. **Mixed Type Handling**  
+   When encountering incompatible types:
+   ```dart
+   // Automatically falls back to dynamic type
+   List<dynamic> complexList;
+   ```
+
+4. **Custom Configuration**  
+   Combine parameters for customized generation:
+   ```shell
+   # Disable autoequal and copywith generation
+   flutter pub run json5_model --noautoequal --nocopywith
+   ```
+
+## Example:
 ```shell
 flutter pub run json5_model --src=lib/data/json
 ```
