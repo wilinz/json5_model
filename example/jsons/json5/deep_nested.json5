@@ -1,0 +1,17 @@
+{
+  "order": {
+    "order_id": "ORD-123",
+    "items": [
+      {
+        "product": {
+          "name": "Flutter Guide",
+          "suppliers": [
+            {"id": 1, "name": "Supplier A"},
+            {"id": 2, "name": "Supplier B"}
+          ]
+        },
+        "quantity": 2
+      }
+    ]
+  }
+}

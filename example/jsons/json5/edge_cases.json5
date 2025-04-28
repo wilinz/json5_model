@@ -1,0 +1,12 @@
+{
+  "empty_list": [],
+  "null_list": null,
+  "deep_null": {
+    "a": null,
+    "b": {"c": null}
+  },
+  "polymorphic": [
+    {"type": "text", "content": "Hello"},
+    {"type": "image", "url": "1.jpg", "width": 300}
+  ]
+}

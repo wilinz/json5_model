@@ -1,0 +1,19 @@
+{
+  "response": {
+    "meta": {
+      "pagination": {
+        "total": 100,
+        "page_size": 20
+      }
+    },
+    "data": [
+      {
+        "id": "user_1",
+        "attributes": {
+          "scores": [90, 85.5, null],
+          "tags": {"frontend": 3, "backend": 5}
+        }
+      }
+    ]
+  }
+}
