@@ -1,3 +1,8 @@
+## [3.0.1] - 2025-4-29
+
+### Fixed
+Fix List<Item?> is recognized as a List<dynamic?>
+
 ## [3.0.0] - 2025-4-29
 
 ### Added
