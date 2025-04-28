@@ -50,6 +50,15 @@ class Field {
 
   @override
   String toString() => 'Field{type: $type, name: $name}';
+
+  Field copyWith({String? type, String? name, bool? isLate, bool? nullable}) =>
+      Field(
+        type ?? this.type,
+        name ?? this.name,
+        rawName,
+        isLate ?? this.isLate,
+        nullable ?? this.nullable,
+      );
 }
 
 class ListField extends Field {
@@ -101,9 +110,9 @@ Future<void> main(List<String> args) async {
   String? tag;
   bool noCopyWith = false;
   bool noAutoequal = false;
-  bool nullable = false;
+  bool restore = false;
   bool clean = false;
-  bool once = true;
+  bool keepSource = false;
   final parser = ArgParser();
   parser.addOption(
     'src',
@@ -117,12 +126,7 @@ Future<void> main(List<String> args) async {
     callback: (v) => dist = v,
     help: "Specify the dist directory.",
   );
-  parser.addOption(
-    'once',
-    defaultsTo: "true",
-    callback: (v) => once = (v != 'false'),
-    help: "Automatically rename the JSON file to start with '_' after build",
-  );
+
   parser.addOption(
     'tag',
     defaultsTo: '\$',
@@ -133,27 +137,47 @@ Future<void> main(List<String> args) async {
   parser.addFlag(
     'nocopywith',
     callback: (v) => noCopyWith = v,
-    help: "Generate copyWith method",
+    help: "Disable generating copyWith methods for model classes",
+    negatable: false,
   );
+
   parser.addFlag(
     'noautoequal',
     callback: (v) => noAutoequal = v,
-    help: "Generate copyWith method",
+    help:
+        "Disable generating equality comparison (Autoequal) for model classes",
+    negatable: false,
   );
-  parser.addFlag('nullable', callback: (v) => nullable = v);
+
+  parser.addFlag(
+    'restore',
+    callback: (v) => restore = v,
+    help: "Restore all JSON files that were renamed with '_' prefix",
+    negatable: false,
+  );
+
+  parser.addFlag(
+    'keepsource',
+    callback: (v) => keepSource = v,
+    help:
+        "Keep original JSON source files after generation (don't rename with '_' prefix)",
+    negatable: false,
+  );
+
   parser.addFlag('clean', callback: (v) => clean = v);
 
   parser.parse(args);
-  // return;
-  if (clean) {
+
+  if (restore) {
+    restoreRenamedFiles(src!);
+  } else if (clean) {
     br.run(['clean']);
   } else {
     var files = <String>[];
     final isGenerated = generateModelClass(src!, dist!, tag!,
         noCopyWith: noCopyWith,
         noAutoequal: noAutoequal,
-        nullable: nullable,
-        once: once, onGenerate: (f) {
+        keepSource: keepSource, onGenerate: (f) {
       files = f;
     });
     if (isGenerated) {
@@ -173,8 +197,7 @@ Future<void> main(List<String> args) async {
 }
 
 bool generateModelClass(String srcDir, String distDir, String tag,
-    {required bool nullable,
-    required bool once,
+    {required bool keepSource,
     required bool noCopyWith,
     required bool noAutoequal,
     Function(List<String> allGeneratedFiles)? onGenerate}) {
@@ -394,7 +417,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         ..writeAsStringSync(dist);
 
       var sourceFilePath = file.path;
-      if (once) {
+      if (!keepSource) {
         final newName = "_" + path.basename(file.path);
         sourceFilePath = path.join(file.parent.path, newName);
         file.renameSync(sourceFilePath);
@@ -586,75 +609,104 @@ dynamic getFieldType(v, List<Class> classes, String name) {
 }
 
 Field handleList(List<Class> classes, String name, List list) {
-  final types = List.empty(growable: true);
+  final types = <dynamic>[];
   list.forEach((v) {
     final type = getFieldType(v, classes, name);
     types.add(type);
   });
 
-  if (types.isEmpty) return Field("List", name, name, true, false);
-  bool isSingleType = getIsSingleType(types);
-  if (!isSingleType) {
-    return Field("List", name, name, true, false);
-  } else if (types.first is Class) {
-    Class class0 = types.first as Class;
-    handleFieldsAreNullable(types, class0);
-    handleNullableFieldType(types, class0);
-    classes.add(class0);
-    return ListField("List<${class0.name}>", class0.name, name, true, false);
-  } else {
-    //String or int ...
-    return Field("List<${types.first}>", name, name, true, false);
-  }
-}
+  if (types.isEmpty) return Field("List<dynamic>", name, name, true, true);
 
-bool getIsSingleType(List<dynamic> types) {
-  bool isSingleType = true;
-  var lastType = null;
-  for (final type in types) {
-    if (type != lastType && lastType != null) {
-      isSingleType = false;
-      break;
-    }
-    lastType = type;
-  }
-  return isSingleType;
-}
+  // 处理所有元素都是 Map 的情况
+  final allMaps = types.every((t) => t is Class);
+  if (allMaps) {
+    final classList = types.cast<Class>();
+    final mergedClassName =
+        '${name.underlineToHumpNaming(true)}Item'.safeName();
 
-void handleFieldsAreNullable(List<dynamic> types, Class class0) {
-  Class? lastClass = null;
-  for (final class1 in types) {
-    if (lastClass != null) {
-      class1 as Class;
-      for (final field in class1.fields) {
-        if (field.type == "Null" || field.nullable) {
-          final class0Field =
-              class0.fields.firstWhereOrNull((e) => e.name == field.name);
-          class0Field
-            ?..nullable = true
-            ..type = "Null";
-        }
+    // 收集所有字段名
+    final allFieldNames = <String>{};
+    for (final cls in classList) {
+      for (final field in cls.fields) {
+        allFieldNames.add(field.name);
       }
     }
-    lastClass = class1 as Class;
+
+    // 合并每个字段
+    final mergedFields = <Field>[];
+    for (final fieldName in allFieldNames) {
+      final existingFields = <Field>[];
+      for (final cls in classList) {
+        final field = cls.fields.firstWhereOrNull((f) => f.name == fieldName);
+        if (field != null) existingFields.add(field);
+      }
+
+      // 合并类型逻辑
+      final typeList =
+          existingFields.map((f) => f.type.replaceAll('?', '')).toList();
+      String mergedType = mergeTypes(typeList);
+
+      // 处理可空性：字段不存在于所有 Map 中，或任一值为 null
+      final existsInAll = existingFields.length == classList.length;
+      final hasNullValue = list.any((item) {
+        final map = item as Map<String, dynamic>;
+        return !map.containsKey(fieldName) || map[fieldName] == null;
+      });
+
+      mergedFields.add(Field(
+        mergedType,
+        fieldName,
+        existingFields.firstOrNull()?.rawName ?? fieldName,
+        true,
+        !existsInAll || hasNullValue,
+      ));
+    }
+
+    final mergedClass = Class(mergedClassName, mergedClassName, mergedFields);
+    classes.add(mergedClass);
+    return ListField(
+        "List<${mergedClass.name}>", mergedClass.name, name, true, false);
   }
+
+  // 处理基本类型列表
+  final basicTypes = types.whereType<String>().toList();
+  if (basicTypes.isNotEmpty) {
+    // 分离 null 标记
+    final hasNull = basicTypes.contains('Null');
+    final filteredTypes = basicTypes.where((t) => t != 'Null').toList();
+
+    // 类型合并逻辑
+    String mergedType = mergeTypes(filteredTypes);
+
+    // 处理数值类型升级
+    if (filteredTypes.contains('double') && filteredTypes.contains('int')) {
+      mergedType = 'double';
+    }
+
+    // 添加可空标记
+    if (hasNull || mergedType.isEmpty) {
+      mergedType = mergedType.isEmpty ? 'dynamic' : '$mergedType?';
+    }
+
+    return Field("List<$mergedType>", name, name, true, hasNull);
+  }
+
+  // 混合类型或无法处理的情况
+  return Field("List<dynamic>", name, name, true, true);
 }
 
-void handleNullableFieldType(List<dynamic> types, Class class0) {
-  final nullables = class0.fields.where((e) => e.type == "Null");
-  nullables.forEach((nullable) {
-    String? type;
-    for (final class2 in types) {
-      class2 as Class;
-      type = class2.fields
-          .firstWhereOrNull((e) => e.name == nullable.name && e.type != "Null")
-          ?.type;
-      if (type != null) break;
-    }
-    type ??= "dynamic";
-    nullable.nullable = true;
-    nullable.type = type;
-  });
+String mergeTypes(List<String> types) {
+  if (types.isEmpty) return 'dynamic';
+
+  // 类型优先级
+  const typePriority = ['double', 'int', 'String', 'bool'];
+  for (final type in typePriority) {
+    if (types.contains(type)) return type;
+  }
+
+  // 统一类型检查
+  final uniqueTypes = types.toSet();
+  return uniqueTypes.length == 1 ? uniqueTypes.first : 'dynamic';
 }
 
 extension ListExt<E> on Iterable<E> {
@@ -687,15 +739,6 @@ String exportIndexFile(String exportClassName, bool isList, String p,
   return indexFile;
 }
 
-String changeFirstChar(String str, [bool upper = true]) {
-  return (upper ? str[0].toUpperCase() : str[0].toLowerCase()) +
-      str.substring(1);
-}
-
-bool isBuiltInType(String type) {
-  return ['int', 'num', 'string', 'double', 'map', 'list'].contains(type);
-}
-
 String replaceTemplate(String template, List<Object> params) {
   int matchIndex = 0;
   String replace(Match m) {
@@ -711,4 +754,21 @@ String replaceTemplate(String template, List<Object> params) {
   }
 
   return template.replaceAllMapped("%s", replace);
+}
+
+void restoreRenamedFiles(String srcDir) {
+  final src = Directory(srcDir);
+  final fileList = src.listSync(recursive: true);
+
+  fileList.forEach((f) {
+    if (FileSystemEntity.isFileSync(f.path)) {
+      final fileName = path.basename(f.path);
+      if (fileName.startsWith('_')) {
+        final originalName = fileName.substring(1);
+        final originalPath = path.join(path.dirname(f.path), originalName);
+        File(f.path).renameSync(originalPath);
+        print('Restored: ${f.path} -> $originalPath');
+      }
+    }
+  });
 }
