@@ -10,10 +10,6 @@ extension _$PartialFieldsAutoequal on PartialFields {
   List<Object?> get _$props => [a, b, c, d, f];
 }
 
-extension _$AAutoequal on A {
-  List<Object?> get _$props => [id, name, email];
-}
-
 extension _$AItemAutoequal on AItem {
   List<Object?> get _$props => [id, name, email, phone];
 }
@@ -113,77 +109,6 @@ extension $PartialFieldsCopyWith on PartialFields {
   /// Returns a callable class that can be used as follows: `instanceOfPartialFields.copyWith(...)` or like so:`instanceOfPartialFields.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$PartialFieldsCWProxy get copyWith => _$PartialFieldsCWProxyImpl(this);
-}
-
-abstract class _$ACWProxy {
-  A id(int id);
-
-  A name(String name);
-
-  A email(String email);
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `A(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
-  ///
-  /// Usage
-  /// ```dart
-  /// A(...).copyWith(id: 12, name: "My name")
-  /// ````
-  A call({
-    int id,
-    String name,
-    String email,
-  });
-}
-
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfA.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfA.copyWith.fieldName(...)`
-class _$ACWProxyImpl implements _$ACWProxy {
-  const _$ACWProxyImpl(this._value);
-
-  final A _value;
-
-  @override
-  A id(int id) => this(id: id);
-
-  @override
-  A name(String name) => this(name: name);
-
-  @override
-  A email(String email) => this(email: email);
-
-  @override
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `A(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
-  ///
-  /// Usage
-  /// ```dart
-  /// A(...).copyWith(id: 12, name: "My name")
-  /// ````
-  A call({
-    Object? id = const $CopyWithPlaceholder(),
-    Object? name = const $CopyWithPlaceholder(),
-    Object? email = const $CopyWithPlaceholder(),
-  }) {
-    return A(
-      id: id == const $CopyWithPlaceholder()
-          ? _value.id
-          // ignore: cast_nullable_to_non_nullable
-          : id as int,
-      name: name == const $CopyWithPlaceholder()
-          ? _value.name
-          // ignore: cast_nullable_to_non_nullable
-          : name as String,
-      email: email == const $CopyWithPlaceholder()
-          ? _value.email
-          // ignore: cast_nullable_to_non_nullable
-          : email as String,
-    );
-  }
-}
-
-extension $ACopyWith on A {
-  /// Returns a callable class that can be used as follows: `instanceOfA.copyWith(...)` or like so:`instanceOfA.copyWith.fieldName(...)`.
-  // ignore: library_private_types_in_public_api
-  _$ACWProxy get copyWith => _$ACWProxyImpl(this);
 }
 
 abstract class _$AItemCWProxy {
@@ -300,18 +225,6 @@ Map<String, dynamic> _$PartialFieldsToJson(PartialFields instance) =>
       'c': instance.c,
       'd': instance.d,
       'f': instance.f,
-    };
-
-A _$AFromJson(Map<String, dynamic> json) => A(
-      id: (json['id'] as num?)?.toInt() ?? 0,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-    );
-
-Map<String, dynamic> _$AToJson(A instance) => <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'email': instance.email,
     };
 
 AItem _$AItemFromJson(Map<String, dynamic> json) => AItem(

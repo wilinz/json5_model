@@ -46,36 +46,6 @@ class PartialFields with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class A with EquatableMixin {
-
-  A(
-      {required this.id,
-      required this.name,
-      required this.email});
-
-  @JsonKey(name: "id", defaultValue: 0)
-  final int id;
-
-  @JsonKey(name: "name", defaultValue: "")
-  final String name;
-
-  @JsonKey(name: "email", defaultValue: "")
-  final String email;
-
-
-  factory A.fromJson(Map<String, dynamic> json) => _$AFromJson(json);
-  
-  Map<String, dynamic> toJson() => _$AToJson(this);
-  
-  factory A.emptyInstance() => A(id: 0, name: "", email: "");
-  
-  @override
-  List<Object?> get props => _$props;
-}
-
-@CopyWith()
-@Autoequal()
-@JsonSerializable(explicitToJson: true)
 class AItem with EquatableMixin {
 
   AItem(
