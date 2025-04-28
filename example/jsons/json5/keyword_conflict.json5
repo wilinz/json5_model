@@ -1,0 +1,7 @@
+{
+  "class": "CS101",
+  "interface": "public",
+  "list": ["dart", "flutter"],
+  "map": {"key": "value"},
+  "future": "2024-01-01"
+}

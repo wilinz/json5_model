@@ -1,0 +1,24 @@
+{
+  "numbers": [
+    1,
+    2,
+    3
+  ],
+  "users": [
+    {
+      "name": "Bob",
+      "type": "guest"
+    },
+    {
+      "name": "Charlie",
+      "type": "admin"
+    }
+  ],
+  "mixed_list": [
+    42,
+    {
+      "value": "dart"
+    },
+    false
+  ]
+}

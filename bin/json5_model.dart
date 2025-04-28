@@ -6,72 +6,59 @@ import 'package:json5/json5.dart';
 
 class Class {
   late String _name;
-
   final String rawName;
+  List<Field> fields;
 
-  set name(String v) {
-    _name = v.underlineToHumpNaming(true);
+  Class(String name, this.rawName, this.fields) {
+    _name = name
+        .underlineToHumpNaming(true) // 处理内置类冲突
+        .safeName(); // 处理关键字冲突
   }
 
   String get name => _name;
 
-  List<Field> fields;
-
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Class && runtimeType == other.runtimeType && name == other.name;
+      identical(this, other) || other is Class && name == other.name;
 
   @override
   int get hashCode => name.hashCode;
 
   @override
-  String toString() {
-    return 'Class{name: $name, fields: $fields}';
-  }
-
-  Class(String name, this.rawName, this.fields) {
-    this.name = name.underlineToHumpNaming(true);
-  }
+  String toString() => 'Class{name: $name, fields: $fields}';
 }
 
 class Field {
   String type;
   late String _name;
-
   final String rawName;
-
-  set name(String v) {
-    _name = v.underlineToHumpNaming(false);
-  }
-
-  String get name => _name;
   bool isLate;
   bool nullable;
 
   Field(this.type, String name, this.rawName, this.isLate, this.nullable) {
-    this.name = name;
+    _name = name.underlineToHumpNaming(false).safeName(); // 字段名安全处理
   }
+
+  String get name => _name;
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Field && runtimeType == other.runtimeType && name == other.name;
-
-  @override
-  String toString() {
-    return 'Field{type: $type, name: $name, isLate: $isLate, nullable: $nullable}';
-  }
+      identical(this, other) || other is Field && name == other.name;
 
   @override
   int get hashCode => name.hashCode;
+
+  @override
+  String toString() => 'Field{type: $type, name: $name}';
 }
 
 class ListField extends Field {
   String subtype;
 
   ListField(String type, this.subtype, String name, bool isLate, bool nullable)
-      : super(type, name, name, isLate, nullable);
+      : super(type, name, name, isLate, nullable) {
+    subtype = subtype.safeName(); // 泛型参数安全处理
+  }
 }
 
 // Dart file template
@@ -254,10 +241,12 @@ bool generateModelClass(String srcDir, String distDir, String tag,
 
       final classesStr = StringBuffer();
       final topClassIndex = classes.indexWhere((c) => c.name == className);
-      final topClass = classes[topClassIndex];
-      classes
-        ..removeAt(topClassIndex)
-        ..insert(0, topClass);
+      if (topClassIndex >= 0) {
+        final topClass = classes[topClassIndex];
+        classes
+          ..removeAt(topClassIndex)
+          ..insert(0, topClass);
+      }
 
       classes.forEach((c) {
         String constructorStr = "";
@@ -349,14 +338,16 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         final autoEqualProps = StringBuffer();
 
         final noCopyWith1 = c.fields.isEmpty || noCopyWith;
-        if (!noCopyWith1){
+        if (!noCopyWith1) {
           annotations.write("@CopyWith()\n");
-          importSet.add("import 'package:copy_with_extension/copy_with_extension.dart'");
+          importSet.add(
+              "import 'package:copy_with_extension/copy_with_extension.dart'");
         }
-        if (!noAutoequal){
+        if (!noAutoequal) {
           annotations.write("@Autoequal()\n");
           autoEqualMixin.write("with EquatableMixin ");
-          autoEqualProps.write("@override\n  List<Object?> get props => _\$props;");
+          autoEqualProps
+              .write("@override\n  List<Object?> get props => _\$props;");
           importSet.add("import 'package:equatable/equatable.dart'");
           importSet.add("import 'package:autoequal/autoequal.dart'");
         }
@@ -467,6 +458,72 @@ extension StringExt on String {
       i++;
     }
     return str.toString();
+  }
+
+  // 关键字处理（添加X后缀）
+  String safeName() {
+    const keywords = {
+      'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
+      'class', 'const', 'continue', 'covariant', 'default', 'deferred', 'do',
+      'dynamic', 'else', 'enum', 'export', 'extends', 'extension', 'external',
+      'factory', 'false', 'final', 'finally', 'for', 'Function', 'get', 'hide',
+      'if', 'implements', 'import', 'in', 'interface', 'is', 'late', 'library',
+      'mixin', 'new', 'null', 'on', 'operator', 'part', 'required', 'rethrow',
+      'return', 'set', 'show', 'static', 'super', 'switch', 'sync', 'this',
+      'throw', 'true', 'try', 'typedef', 'var', 'void', 'while', 'with',
+      'yield' //
+    };
+    const dartBuiltInTypes = {
+      // Dart 核心库
+      'Object', 'Enum', 'Never', 'Future', 'Stream', 'Iterable', 'Iterator',
+      'Symbol', 'Type', 'Function', 'Pattern', 'RegExp', 'Uri',
+
+      // 基础类型
+      'num', 'int', 'double', 'String', 'bool', 'Null', 'dynamic', 'void',
+
+      // 集合类型
+      'List', 'Set', 'Map', 'Queue', 'LinkedList', 'HashMap', 'LinkedHashMap',
+      'HashSet', 'LinkedHashSet', 'UnmodifiableListView',
+      'UnmodifiableMapView', //
+
+      // 日期时间
+      'DateTime', 'Duration', 'Stopwatch',
+
+      // 数学相关
+      'BigInt', 'Random', 'Rectangle', 'Point', 'Offset',
+
+      // 异步/隔离
+      'Completer', 'SynchronousFuture', 'Timer', 'Zone', 'Isolate',
+      'ReceivePort', 'SendPort', 'StreamController', 'StreamSubscription', //
+
+      // 错误处理
+      'Error', 'Exception', 'StackTrace', 'AssertionError', 'FormatException',
+      'RangeError', 'StateError', 'UnsupportedError', 'ArgumentError', //
+
+      // Flutter 常用
+      'Widget', 'BuildContext', 'Key', 'State', 'StatefulWidget',
+      'StatelessWidget', 'MaterialApp', 'Scaffold', 'Text', 'Column', 'Row',
+      'Container', 'ListView', 'AppBar', 'Theme', 'Navigator', 'Overlay',
+      'FocusNode', 'ScrollController', //
+
+      // IO 相关
+      'File', 'Directory', 'Link', 'Process', 'HttpClient', 'Socket',
+      'WebSocket', 'Platform', 'Stdout', 'Stdin', //
+
+      // 序列化/JSON
+      'JsonCodec', 'Utf8Codec', 'JsonEncoder', 'JsonDecoder',
+
+      // 其他高频
+      'ChangeNotifier', 'ValueNotifier', 'TextEditingController', 'Animation',
+      'AnimationController', 'FocusScope', 'FormField', 'Route', 'Canvas',
+      'Paint', 'Path', 'Image', 'AssetBundle', 'Locale', 'Semantics', //
+
+      // 测试相关
+      'Test', 'Mock', 'Fake', 'Expect', 'Matcher' //
+    };
+    return keywords.contains(this) || dartBuiltInTypes.contains(this)
+        ? '${this}X'
+        : this;
   }
 }
 

@@ -1,0 +1,21 @@
+{
+  "response": {
+    "status": 200,
+    "data": {
+      "items": [
+        {
+          "id": 1,
+          "tags": ["new", "featured"],
+          "details": {
+            "created_by": "system",
+            "modified_at": "2023-05-01"
+          }
+        }
+      ],
+      "pagination": {
+        "total": 100,
+        "page_size": 20
+      }
+    }
+  }
+}
