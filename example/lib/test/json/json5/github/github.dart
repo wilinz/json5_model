@@ -1,9 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:equatable/equatable.dart';
+import 'package:autoequal/autoequal.dart';
 
 part 'github.g.dart';
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Github {
+class Github with EquatableMixin {
 
   Github(
       {required this.id,
@@ -15,42 +20,47 @@ class Github {
       required this.securityAndAnalysis});
 
   @JsonKey(name: "id", defaultValue: 0)
-  int id;
+  final int id;
 
   @JsonKey(name: "node_id", defaultValue: "")
-  String nodeId;
+  final String nodeId;
 
   @JsonKey(name: "owner", defaultValue: Owner.emptyInstance)
-  Owner owner;
+  final Owner owner;
 
   @JsonKey(name: "private", defaultValue: false)
-  bool private;
+  final bool private;
 
   @JsonKey(name: "topics", defaultValue: [])
-  List<String> topics;
+  final List<String> topics;
 
   @JsonKey(name: "permissions", defaultValue: Permissions.emptyInstance)
-  Permissions permissions;
+  final Permissions permissions;
 
   @JsonKey(name: "security_and_analysis", defaultValue: SecurityAndAnalysis.emptyInstance)
-  SecurityAndAnalysis securityAndAnalysis;
+  final SecurityAndAnalysis securityAndAnalysis;
 
 
   factory Github.fromJson(Map<String, dynamic> json) => _$GithubFromJson(json);
   
   Map<String, dynamic> toJson() => _$GithubToJson(this);
   
-  factory Github.emptyInstance() => Github(id: 0, nodeId: "", owner: Owner.emptyInstance(), private: false, topics: const [], permissions: Permissions.emptyInstance(), securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
+  factory Github.emptyInstance() => Github(id: 0, nodeId: "", owner: Owner.emptyInstance(), private: false, topics: [], permissions: Permissions.emptyInstance(), securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Owner {
+class Owner with EquatableMixin {
 
   Owner(
       {required this.login});
 
   @JsonKey(name: "login", defaultValue: "")
-  String login;
+  final String login;
 
 
   factory Owner.fromJson(Map<String, dynamic> json) => _$OwnerFromJson(json);
@@ -58,10 +68,15 @@ class Owner {
   Map<String, dynamic> toJson() => _$OwnerToJson(this);
   
   factory Owner.emptyInstance() => Owner(login: "");
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Permissions {
+class Permissions with EquatableMixin {
 
   Permissions(
       {required this.admin,
@@ -69,13 +84,13 @@ class Permissions {
       required this.pull});
 
   @JsonKey(name: "admin", defaultValue: false)
-  bool admin;
+  final bool admin;
 
   @JsonKey(name: "push", defaultValue: false)
-  bool push;
+  final bool push;
 
   @JsonKey(name: "pull", defaultValue: false)
-  bool pull;
+  final bool pull;
 
 
   factory Permissions.fromJson(Map<String, dynamic> json) => _$PermissionsFromJson(json);
@@ -83,16 +98,21 @@ class Permissions {
   Map<String, dynamic> toJson() => _$PermissionsToJson(this);
   
   factory Permissions.emptyInstance() => Permissions(admin: false, push: false, pull: false);
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class AdvancedSecurity {
+class AdvancedSecurity with EquatableMixin {
 
   AdvancedSecurity(
       {required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
-  String status;
+  final String status;
 
 
   factory AdvancedSecurity.fromJson(Map<String, dynamic> json) => _$AdvancedSecurityFromJson(json);
@@ -100,16 +120,21 @@ class AdvancedSecurity {
   Map<String, dynamic> toJson() => _$AdvancedSecurityToJson(this);
   
   factory AdvancedSecurity.emptyInstance() => AdvancedSecurity(status: "");
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanning {
+class SecretScanning with EquatableMixin {
 
   SecretScanning(
       {required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
-  String status;
+  final String status;
 
 
   factory SecretScanning.fromJson(Map<String, dynamic> json) => _$SecretScanningFromJson(json);
@@ -117,16 +142,21 @@ class SecretScanning {
   Map<String, dynamic> toJson() => _$SecretScanningToJson(this);
   
   factory SecretScanning.emptyInstance() => SecretScanning(status: "");
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanningPushProtection {
+class SecretScanningPushProtection with EquatableMixin {
 
   SecretScanningPushProtection(
       {required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
-  String status;
+  final String status;
 
 
   factory SecretScanningPushProtection.fromJson(Map<String, dynamic> json) => _$SecretScanningPushProtectionFromJson(json);
@@ -134,10 +164,15 @@ class SecretScanningPushProtection {
   Map<String, dynamic> toJson() => _$SecretScanningPushProtectionToJson(this);
   
   factory SecretScanningPushProtection.emptyInstance() => SecretScanningPushProtection(status: "");
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
+@CopyWith()
+@Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecurityAndAnalysis {
+class SecurityAndAnalysis with EquatableMixin {
 
   SecurityAndAnalysis(
       {required this.advancedSecurity,
@@ -145,13 +180,13 @@ class SecurityAndAnalysis {
       required this.secretScanningPushProtection});
 
   @JsonKey(name: "advanced_security", defaultValue: AdvancedSecurity.emptyInstance)
-  AdvancedSecurity advancedSecurity;
+  final AdvancedSecurity advancedSecurity;
 
   @JsonKey(name: "secret_scanning", defaultValue: SecretScanning.emptyInstance)
-  SecretScanning secretScanning;
+  final SecretScanning secretScanning;
 
   @JsonKey(name: "secret_scanning_push_protection", defaultValue: SecretScanningPushProtection.emptyInstance)
-  SecretScanningPushProtection secretScanningPushProtection;
+  final SecretScanningPushProtection secretScanningPushProtection;
 
 
   factory SecurityAndAnalysis.fromJson(Map<String, dynamic> json) => _$SecurityAndAnalysisFromJson(json);
@@ -159,6 +194,9 @@ class SecurityAndAnalysis {
   Map<String, dynamic> toJson() => _$SecurityAndAnalysisToJson(this);
   
   factory SecurityAndAnalysis.emptyInstance() => SecurityAndAnalysis(advancedSecurity: AdvancedSecurity.emptyInstance(), secretScanning: SecretScanning.emptyInstance(), secretScanningPushProtection: SecretScanningPushProtection.emptyInstance());
+  
+  @override
+  List<Object?> get props => _$props;
 }
 
 

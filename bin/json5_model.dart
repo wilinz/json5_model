@@ -82,32 +82,38 @@ part '%s.g.dart';
 
 %s
 """;
-const tpl = """@JsonSerializable(explicitToJson: true)
-class %s {
+const tpl = """
+%s@JsonSerializable(explicitToJson: true)
+class %s %s{
 
   %s
-
 %s
   factory %s.fromJson(Map<String, dynamic> json) => _\$%sFromJson(json);
   
   Map<String, dynamic> toJson() => _\$%sToJson(this);
   
   factory %s.emptyInstance() => %s(%s);
+  
+  %s
 }
 
 """;
 
-const topListTpl =
-    """List<%s> %sListFormJson(List json) =>
+const topListTpl = """List<%s> %sListFormJson(List json) =>
     json.map((e) => %s.fromJson(e as Map<String, dynamic>)).toList();
 
 List<Map<String, dynamic>> %sListToJson(List<%s> instance) =>
     instance.map((e) => e.toJson()).toList();""";
 
+// @Autoequal()
+// @CopyWith()
+// @JsonSerializable(explicitToJson: true)
 Future<void> main(List<String> args) async {
   String? src;
   String? dist;
   String? tag;
+  bool noCopyWith = false;
+  bool noAutoequal = false;
   bool nullable = false;
   bool clean = false;
   bool once = true;
@@ -137,6 +143,16 @@ Future<void> main(List<String> args) async {
     help: "Specify the tag ",
   );
 
+  parser.addFlag(
+    'nocopywith',
+    callback: (v) => noCopyWith = v,
+    help: "Generate copyWith method",
+  );
+  parser.addFlag(
+    'noautoequal',
+    callback: (v) => noAutoequal = v,
+    help: "Generate copyWith method",
+  );
   parser.addFlag('nullable', callback: (v) => nullable = v);
   parser.addFlag('clean', callback: (v) => clean = v);
 
@@ -147,14 +163,16 @@ Future<void> main(List<String> args) async {
   } else {
     var files = <String>[];
     final isGenerated = generateModelClass(src!, dist!, tag!,
-        nullable: nullable, once: once, onGenerate: (f) { files = f;});
+        noCopyWith: noCopyWith,
+        noAutoequal: noAutoequal,
+        nullable: nullable,
+        once: once, onGenerate: (f) {
+      files = f;
+    });
     if (isGenerated) {
       await br.run(['build', '--delete-conflicting-outputs']);
       final all = files.map((e) => path.join(path.dirname(e), '*'));
-      Process.run('git', [
-        'add',
-        ...all
-      ]).then((ProcessResult result) {
+      Process.run('git', ['add', ...all]).then((ProcessResult result) {
         if (result.exitCode == 0) {
           print('git add succeed');
         } else {
@@ -170,6 +188,8 @@ Future<void> main(List<String> args) async {
 bool generateModelClass(String srcDir, String distDir, String tag,
     {required bool nullable,
     required bool once,
+    required bool noCopyWith,
+    required bool noAutoequal,
     Function(List<String> allGeneratedFiles)? onGenerate}) {
   if (srcDir.endsWith("/")) srcDir = srcDir.substring(0, srcDir.length - 1);
   if (distDir.endsWith("/")) distDir = distDir.substring(0, distDir.length - 1);
@@ -232,10 +252,6 @@ bool generateModelClass(String srcDir, String distDir, String tag,
 
       importSet.add(jsonAnnotation);
 
-      // Insert the imports at the head of dart file.
-      var _import = importSet.join(";\r\n");
-      _import += _import.isEmpty ? "" : ";";
-
       final classesStr = StringBuffer();
       final topClassIndex = classes.indexWhere((c) => c.name == className);
       final topClass = classes[topClassIndex];
@@ -244,51 +260,62 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         ..insert(0, topClass);
 
       classes.forEach((c) {
-        final constructor = StringBuffer();
-        constructor.write("${c.name}(\n      {");
-        final fieldsStr = StringBuffer();
-        var i = 0;
-        c.fields.forEach((f) {
-          if (f.nullable && f.type != "dynamic") {
-            f.type = f.type + "?";
-          }
-          final required = f.nullable ? "" : "required ";
-          final pad = i == 0 ? "" : "      ";
-          final constructorField = "${pad}${required}this.${f.name},\n";
+        String constructorStr = "";
+        String fieldsStr = "";
 
-          String? defaultValue;
-          if (f.type == "String") {
-            defaultValue = "\"\"";
-          } else if (f.type == "int") {
-            defaultValue = "0";
-          } else if (f.type == "double") {
-            defaultValue = "0.0";
-          } else if (f.type == 'List' || f.type.startsWith("List<")) {
-            defaultValue = "[]";
-          } else if (f.type == "bool") {
-            defaultValue = "false";
-          } else if (!f.nullable){
-            defaultValue = "${f.type}.emptyInstance";
-          }
-          final defaultValueStr =
-              defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
+        if (c.fields.isEmpty) {
+          constructorStr = "${c.name}();";
+        } else {
+          final constructor = StringBuffer();
+          constructor.write("${c.name}(\n      {");
+          final fieldsStringBuilder = StringBuffer();
+          var i = 0;
+          c.fields.forEach((f) {
+            if (f.nullable && f.type != "dynamic") {
+              f.type = f.type + "?";
+            }
+            final required = f.nullable ? "" : "required ";
+            final pad = i == 0 ? "" : "      ";
+            final constructorField = "${pad}${required}this.${f.name},\n";
 
-          constructor.write(constructorField);
-          // final late = f.nullable ? "" : "late ";
-          fieldsStr
-              .write("  @JsonKey(name: \"${f.rawName}\"$defaultValueStr)\n");
-          fieldsStr.write("  ${f.type} ${f.name};\n\n");
-          i++;
-        });
-        var constructorStr = constructor.toString();
-        constructorStr =
-            constructorStr.substring(0, constructorStr.length - 2) + "});";
+            String? defaultValue;
+            if (f.type == "String") {
+              defaultValue = "\"\"";
+            } else if (f.type == "int") {
+              defaultValue = "0";
+            } else if (f.type == "double") {
+              defaultValue = "0.0";
+            } else if (f.type == 'List' || f.type.startsWith("List<")) {
+              defaultValue = "[]";
+            } else if (f.type == "bool") {
+              defaultValue = "false";
+            } else if (!f.nullable) {
+              defaultValue = "${f.type}.emptyInstance";
+            }
+            final defaultValueStr =
+                defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
+
+            constructor.write(constructorField);
+            // final late = f.nullable ? "" : "late ";
+            final isFinal = !noAutoequal;
+            final finalStr = isFinal ? "final " : "";
+            fieldsStringBuilder
+                .write("  @JsonKey(name: \"${f.rawName}\"$defaultValueStr)\n");
+            fieldsStringBuilder.write("  ${finalStr}${f.type} ${f.name};\n\n");
+            i++;
+          });
+          fieldsStr = "\n" + fieldsStringBuilder.toString();
+          constructorStr = constructor.toString();
+          constructorStr =
+              constructorStr.substring(0, constructorStr.length - 2) + "});";
+        }
 
         // 构建构造函数默认参数
         final defaultValuesStr = StringBuffer();
         c.fields.forEach((f) {
           String defaultValue;
-          switch (f.type.replaceAll("?", "")) { // 移除可空标记以简化类型匹配
+          switch (f.type.replaceAll("?", "")) {
+            // 移除可空标记以简化类型匹配
             case "String":
               defaultValue = '""';
               break;
@@ -314,11 +341,31 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         });
 
         // 移除最后的逗号和空格
-        var defaultValues = defaultValuesStr.toString().replaceAll(RegExp(r", $"), "");
+        var defaultValues =
+            defaultValuesStr.toString().replaceAll(RegExp(r", $"), "");
+
+        final annotations = StringBuffer();
+        final autoEqualMixin = StringBuffer();
+        final autoEqualProps = StringBuffer();
+
+        final noCopyWith1 = c.fields.isEmpty || noCopyWith;
+        if (!noCopyWith1){
+          annotations.write("@CopyWith()\n");
+          importSet.add("import 'package:copy_with_extension/copy_with_extension.dart'");
+        }
+        if (!noAutoequal){
+          annotations.write("@Autoequal()\n");
+          autoEqualMixin.write("with EquatableMixin ");
+          autoEqualProps.write("@override\n  List<Object?> get props => _\$props;");
+          importSet.add("import 'package:equatable/equatable.dart'");
+          importSet.add("import 'package:autoequal/autoequal.dart'");
+        }
 
         // 使用新的占位符值调用 replaceTemplate
         classesStr.write(replaceTemplate(tpl, [
+          annotations.toString(),
           c.name,
+          autoEqualMixin.toString(),
           constructorStr,
           fieldsStr.toString(),
           c.name,
@@ -327,8 +374,8 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           c.name, // 新增：用于emptyInstance的类名
           c.name, // 新增：用于emptyInstance的构造函数调用
           defaultValues, // 新增：构造函数的默认参数
+          autoEqualProps.toString(),
         ]));
-
       });
 
       String topListFunction = "";
@@ -341,6 +388,10 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           className
         ]);
       }
+
+      // Insert the imports at the head of dart file.
+      var _import = importSet.join(";\r\n");
+      _import += _import.isEmpty ? "" : ";";
 
       final body = topListFunction.isNotEmpty
           ? topListFunction + "\n\n" + classesStr.toString()
@@ -360,10 +411,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
 
       allGeneratedFiles.add(dartFilePath);
 
-      Process.run('git', [
-        'add',
-        sourceFilePath
-      ]).then((ProcessResult result) {
+      Process.run('git', ['add', sourceFilePath]).then((ProcessResult result) {
         if (result.exitCode == 0) {
           print('git add succeed');
         } else {
