@@ -16,7 +16,7 @@ dependencies:
   autoequal: ^0.9.1
 
 dev_dependencies:
-  json5_model: ^3.0.1
+  json5_model: ^3.0.0
   json_serializable: ^6.9.5
   autoequal_gen: ^0.9.5
   copy_with_extension_gen: ^6.0.1
