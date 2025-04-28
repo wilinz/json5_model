@@ -7,10 +7,14 @@ part of 'partial_fields.dart';
 // **************************************************************************
 
 extension _$PartialFieldsAutoequal on PartialFields {
+  List<Object?> get _$props => [a, b, c, d, f];
+}
+
+extension _$AAutoequal on A {
   List<Object?> get _$props => [id, name, email];
 }
 
-extension _$PartialFieldsItemAutoequal on PartialFieldsItem {
+extension _$AItemAutoequal on AItem {
   List<Object?> get _$props => [id, name, email, phone];
 }
 
@@ -19,11 +23,15 @@ extension _$PartialFieldsItemAutoequal on PartialFieldsItem {
 // **************************************************************************
 
 abstract class _$PartialFieldsCWProxy {
-  PartialFields id(int id);
+  PartialFields a(List<AItem> a);
 
-  PartialFields name(String name);
+  PartialFields b(List<String?> b);
 
-  PartialFields email(String email);
+  PartialFields c(List<double?> c);
+
+  PartialFields d(List<int?> d);
+
+  PartialFields f(List<int> f);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PartialFields(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -32,9 +40,11 @@ abstract class _$PartialFieldsCWProxy {
   /// PartialFields(...).copyWith(id: 12, name: "My name")
   /// ````
   PartialFields call({
-    int id,
-    String name,
-    String email,
+    List<AItem> a,
+    List<String?> b,
+    List<double?> c,
+    List<int?> d,
+    List<int> f,
   });
 }
 
@@ -45,13 +55,19 @@ class _$PartialFieldsCWProxyImpl implements _$PartialFieldsCWProxy {
   final PartialFields _value;
 
   @override
-  PartialFields id(int id) => this(id: id);
+  PartialFields a(List<AItem> a) => this(a: a);
 
   @override
-  PartialFields name(String name) => this(name: name);
+  PartialFields b(List<String?> b) => this(b: b);
 
   @override
-  PartialFields email(String email) => this(email: email);
+  PartialFields c(List<double?> c) => this(c: c);
+
+  @override
+  PartialFields d(List<int?> d) => this(d: d);
+
+  @override
+  PartialFields f(List<int> f) => this(f: f);
 
   @override
 
@@ -62,11 +78,92 @@ class _$PartialFieldsCWProxyImpl implements _$PartialFieldsCWProxy {
   /// PartialFields(...).copyWith(id: 12, name: "My name")
   /// ````
   PartialFields call({
+    Object? a = const $CopyWithPlaceholder(),
+    Object? b = const $CopyWithPlaceholder(),
+    Object? c = const $CopyWithPlaceholder(),
+    Object? d = const $CopyWithPlaceholder(),
+    Object? f = const $CopyWithPlaceholder(),
+  }) {
+    return PartialFields(
+      a: a == const $CopyWithPlaceholder()
+          ? _value.a
+          // ignore: cast_nullable_to_non_nullable
+          : a as List<AItem>,
+      b: b == const $CopyWithPlaceholder()
+          ? _value.b
+          // ignore: cast_nullable_to_non_nullable
+          : b as List<String?>,
+      c: c == const $CopyWithPlaceholder()
+          ? _value.c
+          // ignore: cast_nullable_to_non_nullable
+          : c as List<double?>,
+      d: d == const $CopyWithPlaceholder()
+          ? _value.d
+          // ignore: cast_nullable_to_non_nullable
+          : d as List<int?>,
+      f: f == const $CopyWithPlaceholder()
+          ? _value.f
+          // ignore: cast_nullable_to_non_nullable
+          : f as List<int>,
+    );
+  }
+}
+
+extension $PartialFieldsCopyWith on PartialFields {
+  /// Returns a callable class that can be used as follows: `instanceOfPartialFields.copyWith(...)` or like so:`instanceOfPartialFields.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$PartialFieldsCWProxy get copyWith => _$PartialFieldsCWProxyImpl(this);
+}
+
+abstract class _$ACWProxy {
+  A id(int id);
+
+  A name(String name);
+
+  A email(String email);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `A(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// A(...).copyWith(id: 12, name: "My name")
+  /// ````
+  A call({
+    int id,
+    String name,
+    String email,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfA.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfA.copyWith.fieldName(...)`
+class _$ACWProxyImpl implements _$ACWProxy {
+  const _$ACWProxyImpl(this._value);
+
+  final A _value;
+
+  @override
+  A id(int id) => this(id: id);
+
+  @override
+  A name(String name) => this(name: name);
+
+  @override
+  A email(String email) => this(email: email);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `A(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// A(...).copyWith(id: 12, name: "My name")
+  /// ````
+  A call({
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? email = const $CopyWithPlaceholder(),
   }) {
-    return PartialFields(
+    return A(
       id: id == const $CopyWithPlaceholder()
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
@@ -83,28 +180,28 @@ class _$PartialFieldsCWProxyImpl implements _$PartialFieldsCWProxy {
   }
 }
 
-extension $PartialFieldsCopyWith on PartialFields {
-  /// Returns a callable class that can be used as follows: `instanceOfPartialFields.copyWith(...)` or like so:`instanceOfPartialFields.copyWith.fieldName(...)`.
+extension $ACopyWith on A {
+  /// Returns a callable class that can be used as follows: `instanceOfA.copyWith(...)` or like so:`instanceOfA.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$PartialFieldsCWProxy get copyWith => _$PartialFieldsCWProxyImpl(this);
+  _$ACWProxy get copyWith => _$ACWProxyImpl(this);
 }
 
-abstract class _$PartialFieldsItemCWProxy {
-  PartialFieldsItem id(int id);
+abstract class _$AItemCWProxy {
+  AItem id(int id);
 
-  PartialFieldsItem name(String name);
+  AItem name(String name);
 
-  PartialFieldsItem email(String? email);
+  AItem email(String? email);
 
-  PartialFieldsItem phone(String? phone);
+  AItem phone(String? phone);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PartialFieldsItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// PartialFieldsItem(...).copyWith(id: 12, name: "My name")
+  /// AItem(...).copyWith(id: 12, name: "My name")
   /// ````
-  PartialFieldsItem call({
+  AItem call({
     int id,
     String name,
     String? email,
@@ -112,39 +209,39 @@ abstract class _$PartialFieldsItemCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfPartialFieldsItem.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfPartialFieldsItem.copyWith.fieldName(...)`
-class _$PartialFieldsItemCWProxyImpl implements _$PartialFieldsItemCWProxy {
-  const _$PartialFieldsItemCWProxyImpl(this._value);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfAItem.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfAItem.copyWith.fieldName(...)`
+class _$AItemCWProxyImpl implements _$AItemCWProxy {
+  const _$AItemCWProxyImpl(this._value);
 
-  final PartialFieldsItem _value;
-
-  @override
-  PartialFieldsItem id(int id) => this(id: id);
+  final AItem _value;
 
   @override
-  PartialFieldsItem name(String name) => this(name: name);
+  AItem id(int id) => this(id: id);
 
   @override
-  PartialFieldsItem email(String? email) => this(email: email);
+  AItem name(String name) => this(name: name);
 
   @override
-  PartialFieldsItem phone(String? phone) => this(phone: phone);
+  AItem email(String? email) => this(email: email);
+
+  @override
+  AItem phone(String? phone) => this(phone: phone);
 
   @override
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PartialFieldsItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AItem(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// PartialFieldsItem(...).copyWith(id: 12, name: "My name")
+  /// AItem(...).copyWith(id: 12, name: "My name")
   /// ````
-  PartialFieldsItem call({
+  AItem call({
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? email = const $CopyWithPlaceholder(),
     Object? phone = const $CopyWithPlaceholder(),
   }) {
-    return PartialFieldsItem(
+    return AItem(
       id: id == const $CopyWithPlaceholder()
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
@@ -165,11 +262,10 @@ class _$PartialFieldsItemCWProxyImpl implements _$PartialFieldsItemCWProxy {
   }
 }
 
-extension $PartialFieldsItemCopyWith on PartialFieldsItem {
-  /// Returns a callable class that can be used as follows: `instanceOfPartialFieldsItem.copyWith(...)` or like so:`instanceOfPartialFieldsItem.copyWith.fieldName(...)`.
+extension $AItemCopyWith on AItem {
+  /// Returns a callable class that can be used as follows: `instanceOfAItem.copyWith(...)` or like so:`instanceOfAItem.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$PartialFieldsItemCWProxy get copyWith =>
-      _$PartialFieldsItemCWProxyImpl(this);
+  _$AItemCWProxy get copyWith => _$AItemCWProxyImpl(this);
 }
 
 // **************************************************************************
@@ -178,28 +274,54 @@ extension $PartialFieldsItemCopyWith on PartialFieldsItem {
 
 PartialFields _$PartialFieldsFromJson(Map<String, dynamic> json) =>
     PartialFields(
+      a: (json['a'] as List<dynamic>?)
+              ?.map((e) => AItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      b: (json['b'] as List<dynamic>?)?.map((e) => e as String?).toList() ?? [],
+      c: (json['c'] as List<dynamic>?)
+              ?.map((e) => (e as num?)?.toDouble())
+              .toList() ??
+          [],
+      d: (json['d'] as List<dynamic>?)
+              ?.map((e) => (e as num?)?.toInt())
+              .toList() ??
+          [],
+      f: (json['f'] as List<dynamic>?)
+              ?.map((e) => (e as num).toInt())
+              .toList() ??
+          [],
+    );
+
+Map<String, dynamic> _$PartialFieldsToJson(PartialFields instance) =>
+    <String, dynamic>{
+      'a': instance.a.map((e) => e.toJson()).toList(),
+      'b': instance.b,
+      'c': instance.c,
+      'd': instance.d,
+      'f': instance.f,
+    };
+
+A _$AFromJson(Map<String, dynamic> json) => A(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
     );
 
-Map<String, dynamic> _$PartialFieldsToJson(PartialFields instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$AToJson(A instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'email': instance.email,
     };
 
-PartialFieldsItem _$PartialFieldsItemFromJson(Map<String, dynamic> json) =>
-    PartialFieldsItem(
+AItem _$AItemFromJson(Map<String, dynamic> json) => AItem(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String? ?? '',
       email: json['email'] as String?,
       phone: json['phone'] as String?,
     );
 
-Map<String, dynamic> _$PartialFieldsItemToJson(PartialFieldsItem instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$AItemToJson(AItem instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'email': instance.email,

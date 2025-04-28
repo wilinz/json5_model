@@ -5,18 +5,50 @@ import 'package:autoequal/autoequal.dart';
 
 part 'partial_fields.g.dart';
 
-List<PartialFields> partialFieldsListFormJson(List json) =>
-    json.map((e) => PartialFields.fromJson(e as Map<String, dynamic>)).toList();
-
-List<Map<String, dynamic>> partialFieldsListToJson(List<PartialFields> instance) =>
-    instance.map((e) => e.toJson()).toList();
-
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
 class PartialFields with EquatableMixin {
 
   PartialFields(
+      {required this.a,
+      required this.b,
+      required this.c,
+      required this.d,
+      required this.f});
+
+  @JsonKey(name: "a", defaultValue: [])
+  final List<AItem> a;
+
+  @JsonKey(name: "b", defaultValue: [])
+  final List<String?> b;
+
+  @JsonKey(name: "c", defaultValue: [])
+  final List<double?> c;
+
+  @JsonKey(name: "d", defaultValue: [])
+  final List<int?> d;
+
+  @JsonKey(name: "f", defaultValue: [])
+  final List<int> f;
+
+
+  factory PartialFields.fromJson(Map<String, dynamic> json) => _$PartialFieldsFromJson(json);
+  
+  Map<String, dynamic> toJson() => _$PartialFieldsToJson(this);
+  
+  factory PartialFields.emptyInstance() => PartialFields(a: [], b: [], c: [], d: [], f: []);
+  
+  @override
+  List<Object?> get props => _$props;
+}
+
+@CopyWith()
+@Autoequal()
+@JsonSerializable(explicitToJson: true)
+class A with EquatableMixin {
+
+  A(
       {required this.id,
       required this.name,
       required this.email});
@@ -31,11 +63,11 @@ class PartialFields with EquatableMixin {
   final String email;
 
 
-  factory PartialFields.fromJson(Map<String, dynamic> json) => _$PartialFieldsFromJson(json);
+  factory A.fromJson(Map<String, dynamic> json) => _$AFromJson(json);
   
-  Map<String, dynamic> toJson() => _$PartialFieldsToJson(this);
+  Map<String, dynamic> toJson() => _$AToJson(this);
   
-  factory PartialFields.emptyInstance() => PartialFields(id: 0, name: "", email: "");
+  factory A.emptyInstance() => A(id: 0, name: "", email: "");
   
   @override
   List<Object?> get props => _$props;
@@ -44,9 +76,9 @@ class PartialFields with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class PartialFieldsItem with EquatableMixin {
+class AItem with EquatableMixin {
 
-  PartialFieldsItem(
+  AItem(
       {required this.id,
       required this.name,
       this.email,
@@ -65,11 +97,11 @@ class PartialFieldsItem with EquatableMixin {
   final String? phone;
 
 
-  factory PartialFieldsItem.fromJson(Map<String, dynamic> json) => _$PartialFieldsItemFromJson(json);
+  factory AItem.fromJson(Map<String, dynamic> json) => _$AItemFromJson(json);
   
-  Map<String, dynamic> toJson() => _$PartialFieldsItemToJson(this);
+  Map<String, dynamic> toJson() => _$AItemToJson(this);
   
-  factory PartialFieldsItem.emptyInstance() => PartialFieldsItem(id: 0, name: "");
+  factory AItem.emptyInstance() => AItem(id: 0, name: "");
   
   @override
   List<Object?> get props => _$props;

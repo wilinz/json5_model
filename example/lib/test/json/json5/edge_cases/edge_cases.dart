@@ -17,7 +17,7 @@ class EdgeCases with EquatableMixin {
       required this.polymorphic});
 
   @JsonKey(name: "empty_list", defaultValue: [])
-  final List<dynamic> emptyList;
+  final List emptyList;
 
   @JsonKey(name: "null_list")
   final dynamic nullList;
