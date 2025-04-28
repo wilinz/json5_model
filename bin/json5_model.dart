@@ -664,6 +664,9 @@ Field handleList(List<Class> classes, String name, List list) {
     }
 
     final mergedClass = Class(mergedClassName, mergedClassName, mergedFields);
+    for (final class_ in classList) {
+      classes.remove(class_);
+    }
     classes.add(mergedClass);
     return ListField(
         "List<${mergedClass.name}>", mergedClass.name, name, true, nullable);
@@ -693,7 +696,7 @@ Field handleList(List<Class> classes, String name, List list) {
   }
 
   // 混合类型或无法处理的情况
-  return Field("List<dynamic>", name, name, true, true);
+  return Field("List", name, name, true, true);
 }
 
 String mergeTypes(List<String> types) {
