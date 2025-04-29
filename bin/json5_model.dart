@@ -108,8 +108,10 @@ Future<void> main(List<String> args) async {
   String? src;
   String? dist;
   String? tag;
+  String? prefixRegexp;
   bool noCopyWith = false;
   bool noAutoequal = false;
+  bool noFilePrefix = false;
   bool restore = false;
   bool clean = false;
   bool keepSource = false;
@@ -150,6 +152,21 @@ Future<void> main(List<String> args) async {
   );
 
   parser.addFlag(
+    'no-file-prefix',
+    callback: (v) => noFilePrefix = v,
+    help: "Don't prefix the file name to the class name",
+    negatable: false,
+  );
+
+  parser.addOption(
+    'prefix-regexp',
+    defaultsTo: '(.+?)',
+    callback: (v) => prefixRegexp = v,
+    help:
+        "The first matching string obtained by applying a regular expression to the file name is prefixed with the class name",
+  );
+
+  parser.addFlag(
     'restore',
     callback: (v) => restore = v,
     help: "Restore all JSON files that were renamed with '_' prefix",
@@ -177,6 +194,8 @@ Future<void> main(List<String> args) async {
     final isGenerated = generateModelClass(src!, dist!, tag!,
         noCopyWith: noCopyWith,
         noAutoequal: noAutoequal,
+        noFilePrefix: noFilePrefix,
+        prefixRegexp: prefixRegexp!,
         keepSource: keepSource, onGenerate: (f) {
       files = f;
     });
@@ -196,17 +215,23 @@ Future<void> main(List<String> args) async {
   }
 }
 
-bool generateModelClass(String srcDir, String distDir, String tag,
-    {required bool keepSource,
-    required bool noCopyWith,
-    required bool noAutoequal,
-    Function(List<String> allGeneratedFiles)? onGenerate}) {
+bool generateModelClass(
+  String srcDir,
+  String distDir,
+  String tag, {
+  required bool keepSource,
+  required bool noCopyWith,
+  required bool noAutoequal,
+  required bool noFilePrefix,
+  required String prefixRegexp,
+  Function(List<String> allGeneratedFiles)? onGenerate,
+}) {
   if (srcDir.endsWith("/")) srcDir = srcDir.substring(0, srcDir.length - 1);
   if (distDir.endsWith("/")) distDir = distDir.substring(0, distDir.length - 1);
 
   final src = Directory(srcDir);
   final fileList = src.listSync(recursive: true);
-  // String indexFile = "";
+// String indexFile = "";
   if (fileList.isEmpty) return false;
   if (!Directory(distDir).existsSync()) {
     Directory(distDir).createSync(recursive: true);
@@ -237,14 +262,18 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           path.basename(dartFilePath));
 
       final json = json5Decode(file.readAsStringSync());
-      //generated class name
-      final className = fileName.underlineToHumpNaming(true);
+//generated class name
+      final className = fileName.underlineToHumpNaming(true).safeName();
+
+      final re = RegExp(prefixRegexp).firstMatch(fileName)?.group(1);
+      final filePrefix = noFilePrefix ? "" : re ?? className;
+      final level = 0;
 
       var classes = List<Class>.empty(growable: true);
       if (json is List) {
-        handleList(classes, className, json);
+        handleList(classes, className, json, filePrefix, level);
       } else if (json is Map<String, dynamic>) {
-        handleClass(classes, className, json);
+        handleClass(classes, className, json, filePrefix, level);
         classes.forEach((c) {
           c.fields.forEach((f) {
             if (f.type == "Null") {
@@ -256,8 +285,8 @@ bool generateModelClass(String srcDir, String distDir, String tag,
       }
       classes = classes.toSet().toList();
 
-      // To ensure that import statements are not repeated,
-      // we use Set to save import statements
+// To ensure that import statements are not repeated,
+// we use Set to save import statements
       final importSet = Set<String>();
 
       importSet.add(jsonAnnotation);
@@ -308,7 +337,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
                 defaultValue != null ? ", defaultValue: ${defaultValue}" : "";
 
             constructor.write(constructorField);
-            // final late = f.nullable ? "" : "late ";
+// final late = f.nullable ? "" : "late ";
             final isFinal = !noAutoequal;
             final finalStr = isFinal ? "final " : "";
             fieldsStringBuilder
@@ -322,12 +351,12 @@ bool generateModelClass(String srcDir, String distDir, String tag,
               constructorStr.substring(0, constructorStr.length - 2) + "});";
         }
 
-        // 构建构造函数默认参数
+// 构建构造函数默认参数
         final defaultValuesStr = StringBuffer();
         c.fields.forEach((f) {
           String defaultValue;
           switch (f.type.replaceAll("?", "")) {
-            // 移除可空标记以简化类型匹配
+// 移除可空标记以简化类型匹配
             case "String":
               defaultValue = '""';
               break;
@@ -342,7 +371,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
               if (f.type == 'List' || f.type.startsWith("List<")) {
                 defaultValue = "[]";
               } else {
-                // 对于复杂类型，我们假设它们有一个名为 `emptyInstance` 的工厂构造函数
+// 对于复杂类型，我们假设它们有一个名为 `emptyInstance` 的工厂构造函数
                 defaultValue = "${f.type.replaceAll("?", "")}.emptyInstance()";
               }
               break;
@@ -352,7 +381,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           }
         });
 
-        // 移除最后的逗号和空格
+// 移除最后的逗号和空格
         var defaultValues =
             defaultValuesStr.toString().replaceAll(RegExp(r", $"), "");
 
@@ -375,7 +404,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
           importSet.add("import 'package:autoequal/autoequal.dart'");
         }
 
-        // 使用新的占位符值调用 replaceTemplate
+// 使用新的占位符值调用 replaceTemplate
         classesStr.write(replaceTemplate(tpl, [
           annotations.toString(),
           c.name,
@@ -403,7 +432,7 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         ]);
       }
 
-      // Insert the imports at the head of dart file.
+// Insert the imports at the head of dart file.
       var _import = importSet.join(";\r\n");
       _import += _import.isEmpty ? "" : ";";
 
@@ -435,16 +464,16 @@ bool generateModelClass(String srcDir, String distDir, String tag,
         print('git add fail: $error');
       });
 
-      // indexFile = exportIndexFile(
-      //     className, json is List, dartFilePath, distDir, indexFile);
-      // print('done: ${f.path} -> $dartFilePath');
+// indexFile = exportIndexFile(
+//     className, json is List, dartFilePath, distDir, indexFile);
+// print('done: ${f.path} -> $dartFilePath');
     }
   });
-  // if (indexFile.isNotEmpty) {
-  //   final p = path.join(distDir, "index.dart");
-  //   File(p).writeAsStringSync(indexFile);
-  //   print('create index file: $p');
-  // }
+// if (indexFile.isNotEmpty) {
+//   final p = path.join(distDir, "index.dart");
+//   File(p).writeAsStringSync(indexFile);
+//   print('create index file: $p');
+// }
   print("src directory：" + path.canonicalize(srcDir));
   print("dist directory：" + path.canonicalize(distDir));
   onGenerate?.call(allGeneratedFiles);
@@ -458,6 +487,10 @@ extension StringExt on String {
 
   String firstToLowerCase() {
     return this[0].toLowerCase() + this.substring(1);
+  }
+
+  String joinName(String name) {
+    return this + name.firstToUpperCase();
   }
 
   String underlineToHumpNaming(bool firstUpperCase) {
@@ -483,7 +516,7 @@ extension StringExt on String {
     return str.toString();
   }
 
-  // 关键字处理（添加X后缀）
+// 关键字处理（添加X后缀）
   String safeName() {
     const keywords = {
       'abstract', 'as', 'assert', 'async', 'await', 'break', 'case', 'catch',
@@ -497,51 +530,51 @@ extension StringExt on String {
       'yield' //
     };
     const dartBuiltInTypes = {
-      // Dart 核心库
+// Dart 核心库
       'Object', 'Enum', 'Never', 'Future', 'Stream', 'Iterable', 'Iterator',
       'Symbol', 'Type', 'Function', 'Pattern', 'RegExp', 'Uri',
 
-      // 基础类型
+// 基础类型
       'num', 'int', 'double', 'String', 'bool', 'Null', 'dynamic', 'void',
 
-      // 集合类型
+// 集合类型
       'List', 'Set', 'Map', 'Queue', 'LinkedList', 'HashMap', 'LinkedHashMap',
       'HashSet', 'LinkedHashSet', 'UnmodifiableListView',
       'UnmodifiableMapView', //
 
-      // 日期时间
+// 日期时间
       'DateTime', 'Duration', 'Stopwatch',
 
-      // 数学相关
+// 数学相关
       'BigInt', 'Random', 'Rectangle', 'Point', 'Offset',
 
-      // 异步/隔离
+// 异步/隔离
       'Completer', 'SynchronousFuture', 'Timer', 'Zone', 'Isolate',
       'ReceivePort', 'SendPort', 'StreamController', 'StreamSubscription', //
 
-      // 错误处理
+// 错误处理
       'Error', 'Exception', 'StackTrace', 'AssertionError', 'FormatException',
       'RangeError', 'StateError', 'UnsupportedError', 'ArgumentError', //
 
-      // Flutter 常用
+// Flutter 常用
       'Widget', 'BuildContext', 'Key', 'State', 'StatefulWidget',
       'StatelessWidget', 'MaterialApp', 'Scaffold', 'Text', 'Column', 'Row',
       'Container', 'ListView', 'AppBar', 'Theme', 'Navigator', 'Overlay',
       'FocusNode', 'ScrollController', //
 
-      // IO 相关
+// IO 相关
       'File', 'Directory', 'Link', 'Process', 'HttpClient', 'Socket',
       'WebSocket', 'Platform', 'Stdout', 'Stdin', //
 
-      // 序列化/JSON
+// 序列化/JSON
       'JsonCodec', 'Utf8Codec', 'JsonEncoder', 'JsonDecoder',
 
-      // 其他高频
+// 其他高频
       'ChangeNotifier', 'ValueNotifier', 'TextEditingController', 'Animation',
       'AnimationController', 'FocusScope', 'FormField', 'Route', 'Canvas',
       'Paint', 'Path', 'Image', 'AssetBundle', 'Locale', 'Semantics', //
 
-      // 测试相关
+// 测试相关
       'Test', 'Mock', 'Fake', 'Expect', 'Matcher' //
     };
     return keywords.contains(this) || dartBuiltInTypes.contains(this)
@@ -565,23 +598,26 @@ String getType(v) {
   return "dynamic";
 }
 
-Class handleClass(List<Class> classes, String name, Map<String, dynamic> json) {
+Class handleClass(List<Class> classes, String name, Map<String, dynamic> json,
+    String filePrefix, int level) {
   final fields = List<Field>.empty(growable: true);
   json.forEach((key, v) {
-    fields.add(handleValue(classes, key, v));
+    fields.add(handleValue(classes, key, v, filePrefix, level + 1));
     fields.forEach((f) {
       if (f.type == "Null") {
         f.nullable = true;
       }
     });
   });
-  final class1 = Class(name, name, fields);
+  final className = level != 0 ? filePrefix.joinName(name) : name;
+  final class1 = Class(className, name, fields);
   classes.add(class1);
   return class1;
 }
 
-Field handleValue(List<Class> classes, String name, v) {
-  final type = getFieldType(v, classes, name);
+Field handleValue(
+    List<Class> classes, String name, v, String filePrefix, int level) {
+  final type = getFieldType(v, classes, name, filePrefix, level + 1);
   bool nullable = false;
   if (type == "Null") {
     nullable = true;
@@ -593,14 +629,15 @@ Field handleValue(List<Class> classes, String name, v) {
   }
 }
 
-dynamic getFieldType(v, List<Class> classes, String name) {
+dynamic getFieldType(
+    v, List<Class> classes, String name, String filePrefix, int level) {
   String type;
   Class? childClass = null;
   if (v is Map<String, dynamic>) {
-    childClass = handleClass(classes, name, v);
+    childClass = handleClass(classes, name, v, filePrefix, level + 1);
     type = childClass.name;
   } else if (v is List) {
-    final field = handleList(classes, name, v);
+    final field = handleList(classes, name, v, filePrefix, level + 1);
     type = field.type;
   } else {
     type = getType(v);
@@ -608,16 +645,17 @@ dynamic getFieldType(v, List<Class> classes, String name) {
   return childClass ?? type;
 }
 
-Field handleList(List<Class> classes, String name, List list) {
+Field handleList(
+    List<Class> classes, String name, List list, String filePrefix, int level) {
   final types = <dynamic>[];
   list.forEach((v) {
-    final type = getFieldType(v, classes, name);
+    final type = getFieldType(v, classes, name, filePrefix, level + 1);
     types.add(type);
   });
 
   if (types.isEmpty) return Field("List", name, name, true, true);
 
-  // 处理所有元素都是 Map 的情况
+// 处理所有元素都是 Map 的情况
   final allMaps = types.every((t) => t is Class || t == "Null");
   final nullable = types.any((t) => t == "Null");
   if (allMaps) {
@@ -625,7 +663,7 @@ Field handleList(List<Class> classes, String name, List list) {
     final mergedClassName =
         '${name.underlineToHumpNaming(true)}Item'.safeName();
 
-    // 收集所有字段名
+// 收集所有字段名
     final allFieldNames = <String>{};
     for (final cls in classList) {
       for (final field in cls.fields) {
@@ -633,7 +671,7 @@ Field handleList(List<Class> classes, String name, List list) {
       }
     }
 
-    // 合并每个字段
+// 合并每个字段
     final mergedFields = <Field>[];
     for (final fieldName in allFieldNames) {
       final existingFields = <Field>[];
@@ -642,12 +680,12 @@ Field handleList(List<Class> classes, String name, List list) {
         if (field != null) existingFields.add(field);
       }
 
-      // 合并类型逻辑
+// 合并类型逻辑
       final typeList =
           existingFields.map((f) => f.type.replaceAll('?', '')).toList();
       String mergedType = mergeTypes(typeList);
 
-      // 处理可空性：字段不存在于所有 Map 中，或任一值为 null
+// 处理可空性：字段不存在于所有 Map 中，或任一值为 null
       final existsInAll = existingFields.length == classList.length;
       final hasNullValue = list.where((e) => e != null).any((item) {
         final map = item as Map<String, dynamic>;
@@ -663,7 +701,8 @@ Field handleList(List<Class> classes, String name, List list) {
       ));
     }
 
-    final mergedClass = Class(mergedClassName, mergedClassName, mergedFields);
+    final mergedClass = Class(
+        filePrefix.joinName(mergedClassName), mergedClassName, mergedFields);
     for (final class_ in classList) {
       classes.remove(class_);
     }
@@ -672,22 +711,22 @@ Field handleList(List<Class> classes, String name, List list) {
         "List<${mergedClass.name}>", mergedClass.name, name, true, nullable);
   }
 
-  // 处理基本类型列表
+// 处理基本类型列表
   final basicTypes = types.whereType<String>().toList();
   if (basicTypes.isNotEmpty) {
-    // 分离 null 标记
+// 分离 null 标记
     final hasNull = basicTypes.contains('Null');
     final filteredTypes = basicTypes.where((t) => t != 'Null').toList();
 
-    // 类型合并逻辑
+// 类型合并逻辑
     String mergedType = mergeTypes(filteredTypes);
 
-    // 处理数值类型升级
+// 处理数值类型升级
     if (filteredTypes.contains('double') && filteredTypes.contains('int')) {
       mergedType = 'double';
     }
 
-    // 添加可空标记
+// 添加可空标记
     if (hasNull || mergedType.isEmpty) {
       mergedType = mergedType.isEmpty ? 'dynamic' : '$mergedType?';
     }
@@ -695,20 +734,20 @@ Field handleList(List<Class> classes, String name, List list) {
     return Field("List<$mergedType>", name, name, true, hasNull);
   }
 
-  // 混合类型或无法处理的情况
+// 混合类型或无法处理的情况
   return Field("List", name, name, true, true);
 }
 
 String mergeTypes(List<String> types) {
   if (types.isEmpty) return 'dynamic';
 
-  // 类型优先级
+// 类型优先级
   const typePriority = ['double', 'int', 'String', 'bool'];
   for (final type in typePriority) {
     if (types.contains(type)) return type;
   }
 
-  // 统一类型检查
+// 统一类型检查
   final uniqueTypes = types.toSet();
   return uniqueTypes.length == 1 ? uniqueTypes.first : 'dynamic';
 }

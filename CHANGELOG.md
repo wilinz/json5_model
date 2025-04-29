@@ -1,3 +1,12 @@
+## [4.0.0] - 2025-4-29
+
+### Changed
+Add two cli flag:
+| Parameter          | Description                                                        | Default Value |
+|--------------------|--------------------------------------------------------------------|---------------|
+| `--no-file-prefix` | Disable auto-adding class name prefixes (may cause name conflicts) | false         |
+| `--prefix-regexp`  | Apply RegExp to filename to extract class name prefix              | (.+?)         |
+
 ## [3.0.2] - 2025-4-29
 
 ### Fixed

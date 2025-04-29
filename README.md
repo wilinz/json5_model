@@ -2,9 +2,10 @@ Language: [English](README.md) | [简体中文](README-ZH.md)
 
 # json5_model
 
-Convert JSON files to Dart model classes with a single command  
+Convert JSON files to Dart model classes with a single command
 
-An improved version of json_model that supports nested JSON parsing, JSON5 files, and fixes several bugs. Note: The original @meta functionality from json_model is not supported.
+An improved version of json_model that supports nested JSON parsing, JSON5 files, and fixes several
+bugs. Note: The original @meta functionality from json_model is not supported.
 
 ## Installation
 
@@ -28,9 +29,13 @@ dev_dependencies:
 1. Create a directory named "jsons" in your project root
 2. Create or copy JSON files into the "jsons" directory
 3. Examples:
+
 ```shell
 # Custom paths
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
+
+# Use RegExp to extract class name prefix from filenames (e.g. remove "_response" suffix)
+flutter pub run json5_model  --src=lib/data/json --dist=lib/test/json --prefix-regexp "(.+?)_response$"
 
 # Keep source files
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model --keepsource
@@ -42,28 +47,34 @@ flutter pub run json5_model --src=lib/data/json --restore
 ## New Features
 
 ### File Restoration Command
+
 Use the `--restore` parameter to restore all renamed JSON files:
+
 ```shell
 flutter pub run json5_model --restore
 ```
 
 ### Keep Source Files
+
 Add the `--keepsource` parameter to prevent automatic renaming of JSON files:
+
 ```shell
 flutter pub run json5_model --keepsource
 ```
 
 ## Global Command Parameters
 
-| Parameter      | Description                                                      | Default Value |
-|----------------|------------------------------------------------------------------|---------------|
-| `--src`        | Specify JSON source directory                                    | ./jsons       |
-| `--dist`       | Specify output directory                                         | lib/models    |
-| `--nocopywith` | Disable copyWith method generation                               | false         |
-| `--noautoequal`| Disable equality comparison generation                           | false         |
-| `--keepsource` | Keep original JSON files (don't add _ prefix) after generation   | false         |
-| `--restore`    | Restore all renamed JSON files                                   | false         |
-| `--clean`      | Clean generated files                                            | false         |
+| Parameter          | Description                                                        | Default Value |
+|--------------------|--------------------------------------------------------------------|---------------|
+| `--src`            | Specify JSON source directory                                      | ./jsons       |
+| `--dist`           | Specify output directory                                           | lib/models    |
+| `--nocopywith`     | Disable copyWith method generation                                 | false         |
+| `--noautoequal`    | Disable equality comparison generation                             | false         |
+| `--keepsource`     | Keep original JSON files (don't add _ prefix) after generation     | false         |
+| `--restore`        | Restore all renamed JSON files                                     | false         |
+| `--clean`          | Clean generated files                                              | false         |
+| `--no-file-prefix` | Disable auto-adding class name prefixes (may cause name conflicts) | false         |
+| `--prefix-regexp`  | Apply RegExp to filename to extract class name prefix              | (.+?)         |
 
 ## How It Works
 
@@ -75,7 +86,8 @@ flutter pub run json5_model --keepsource
     - Merges fields from multiple JSON structures
 
 2. **File Management**
-    - By default adds "_" prefix to source JSON files after generation (can be disabled with `--keepsource`)
+    - By default adds "_" prefix to source JSON files after generation (can be disabled with
+      `--keepsource`)
     - Use `--restore` to batch restore renamed files
 
 3. **Advanced Features**
@@ -93,17 +105,29 @@ flutter pub run json5_model --keepsource
 ## Example JSON → Dart Conversion
 
 Input JSON:
+
 ```json5
 {
-  "scores": [90, 85.5, null],
+  "scores": [
+    90,
+    85.5,
+    null
+  ],
   "users": [
-    {"name": "Alice", "age": 25},
-    {"name": "Bob", "height": 175.5}
+    {
+      "name": "Alice",
+      "age": 25
+    },
+    {
+      "name": "Bob",
+      "height": 175.5
+    }
   ]
 }
 ```
 
 Generated Dart snippet:
+
 ```dart
 // Automatic numeric type and nullable handling
 List<double?> scores;
@@ -113,8 +137,10 @@ class UsersItem {
   String? name;
   int? age;
   double? height;
-  
-  factory UsersItem.fromJson(Map<String, dynamic> json) => ...
+
+  factory UsersItem.fromJson(Map<String, dynamic> json) =>
+
+  ...
 }
 ```
 
@@ -146,11 +172,13 @@ class UsersItem {
    ```
 
 ## Example:
+
 ```shell
 flutter pub run json5_model --src=lib/data/json
 ```
 
 json:
+
 ```json5
 {
   "id": 1296269,
@@ -185,6 +213,7 @@ json:
 ```
 
 Dart:
+
 ```dart
 import 'package:json_annotation/json_annotation.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -196,16 +225,16 @@ part 'github.g.dart';
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Github with EquatableMixin {
+class Github
+    with EquatableMixin {
 
-  Github(
-      {required this.id,
-        required this.nodeId,
-        required this.owner,
-        required this.private,
-        required this.topics,
-        required this.permissions,
-        required this.securityAndAnalysis});
+  Github({required this.id,
+    required this.nodeId,
+    required this.owner,
+    required this.private,
+    required this.topics,
+    required this.permissions,
+    required this.securityAndAnalysis});
 
   @JsonKey(name: "id", defaultValue: 0)
   final int id;
@@ -233,7 +262,14 @@ class Github with EquatableMixin {
 
   Map<String, dynamic> toJson() => _$GithubToJson(this);
 
-  factory Github.emptyInstance() => Github(id: 0, nodeId: "", owner: Owner.emptyInstance(), private: false, topics: [], permissions: Permissions.emptyInstance(), securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
+  factory Github.emptyInstance() =>
+      Github(id: 0,
+      nodeId: "",
+      owner: Owner.emptyInstance(),
+      private: false,
+      topics: [],
+      permissions: Permissions.emptyInstance(),
+      securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
 
   @override
   List<Object?> get props => _$props;
@@ -242,10 +278,10 @@ class Github with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Owner with EquatableMixin {
+class Owner
+    with EquatableMixin {
 
-  Owner(
-      {required this.login});
+  Owner({required this.login});
 
   @JsonKey(name: "login", defaultValue: "")
   final String login;
@@ -264,12 +300,12 @@ class Owner with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Permissions with EquatableMixin {
+class Permissions
+    with EquatableMixin {
 
-  Permissions(
-      {required this.admin,
-        required this.push,
-        required this.pull});
+  Permissions({required this.admin,
+    required this.push,
+    required this.pull});
 
   @JsonKey(name: "admin", defaultValue: false)
   final bool admin;
@@ -294,10 +330,10 @@ class Permissions with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class AdvancedSecurity with EquatableMixin {
+class AdvancedSecurity
+    with EquatableMixin {
 
-  AdvancedSecurity(
-      {required this.status});
+  AdvancedSecurity({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
@@ -316,10 +352,10 @@ class AdvancedSecurity with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanning with EquatableMixin {
+class SecretScanning
+    with EquatableMixin {
 
-  SecretScanning(
-      {required this.status});
+  SecretScanning({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
@@ -338,16 +374,17 @@ class SecretScanning with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanningPushProtection with EquatableMixin {
+class SecretScanningPushProtection
+    with EquatableMixin {
 
-  SecretScanningPushProtection(
-      {required this.status});
+  SecretScanningPushProtection({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
 
 
-  factory SecretScanningPushProtection.fromJson(Map<String, dynamic> json) => _$SecretScanningPushProtectionFromJson(json);
+  factory SecretScanningPushProtection.fromJson(Map<String, dynamic> json) =>
+      _$SecretScanningPushProtectionFromJson(json);
 
   Map<String, dynamic> toJson() => _$SecretScanningPushProtectionToJson(this);
 
@@ -360,7 +397,8 @@ class SecretScanningPushProtection with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecurityAndAnalysis with EquatableMixin {
+class SecurityAndAnalysis
+    with EquatableMixin {
 
   SecurityAndAnalysis({required this.advancedSecurity,
     required this.secretScanning,

@@ -2,7 +2,7 @@
 
 # json5_model
 
-一行命令，将Json文件转为Dart model类  
+一行命令，将Json文件转为Dart model类
 
 json_model 改进版，支持解析嵌套json，支持json5文件，并修复了一些Bug，不支持原版本的json文件@meta功能
 
@@ -28,9 +28,13 @@ dev_dependencies:
 1. 在工程根目录下创建一个名为 "jsons" 的目录
 2. 创建或拷贝Json文件到"jsons" 目录中
 3. 例子:
+
 ```shell
 # 自定义路径
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
+
+# 正则匹配获取类名前缀，下面的正则表达式会将文件名删除 _response 结尾后作为类名前缀，这样可以防止类名冲突，比如防止编写 dart package 代码时 export 的类名冲突
+flutter pub run json5_model  --src=lib/data/json --dist=lib/test/json --prefix-regexp "(.+?)_response$"
 
 # 保留源文件
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model --keepsource
@@ -42,28 +46,34 @@ flutter pub run json5_model --src=lib/data/json --restore
 ## 新功能
 
 ### 文件恢复命令
+
 使用 `--restore` 参数可以恢复所有被重命名的JSON文件：
+
 ```shell
 flutter pub run json5_model --restore
 ```
 
 ### 保留源文件
+
 添加 `--keepsource` 参数可阻止自动重命名JSON文件：
+
 ```shell
 flutter pub run json5_model --keepsource
 ```
 
 ## 全局命令参数
 
-| 参数          | 说明                                                                 | 默认值        |
-|---------------|--------------------------------------------------------------------|---------------|
-| `--src`       | 指定JSON源文件目录                                                   | ./jsons       |
-| `--dist`      | 指定输出目录                                                         | lib/models    |
-| `--nocopywith`| 禁用生成copyWith方法                                                | false         |
-| `--noautoequal`| 禁用生成相等性比较                                                  | false         |
-| `--keepsource`| 生成后保留原始JSON文件（不添加_前缀）                                 | false         |
-| `--restore`   | 恢复所有被重命名的JSON文件                                           | false         |
-| `--clean`     | 清理生成的文件                                                       | false         |
+| 参数                 | 说明                                     | 默认值        |
+|--------------------|----------------------------------------|------------|
+| `--src`            | 指定JSON源文件目录                            | ./jsons    |
+| `--dist`           | 指定输出目录                                 | lib/models |
+| `--nocopywith`     | 禁用生成copyWith方法                         | false      |
+| `--noautoequal`    | 禁用生成相等性比较                              | false      |
+| `--keepsource`     | 生成后保留原始JSON文件（不添加_前缀）                  | false      |
+| `--restore`        | 恢复所有被重命名的JSON文件                        | false      |
+| `--clean`          | 清理生成的文件                                | false      |
+| `--no-file-prefix` | 禁止添加类名前缀，这可能造成类名冲突                     | false      |
+| `--prefix-regexp`  | 指定类名前缀正则，这会对文件名使用正则表达式获得的第一个匹配字符串为类名前缀 | (.+?)      |
 
 ## 工作机制
 
@@ -93,17 +103,29 @@ flutter pub run json5_model --keepsource
 ## 示例JSON → Dart转换
 
 输入JSON：
+
 ```json5
 {
-  "scores": [90, 85.5, null],
+  "scores": [
+    90,
+    85.5,
+    null
+  ],
   "users": [
-    {"name": "Alice", "age": 25},
-    {"name": "Bob", "height": 175.5}
+    {
+      "name": "Alice",
+      "age": 25
+    },
+    {
+      "name": "Bob",
+      "height": 175.5
+    }
   ]
 }
 ```
 
 生成Dart代码片段：
+
 ```dart
 // 自动处理数值类型和可空
 List<double?> scores;
@@ -113,8 +135,10 @@ class UsersItem {
   String? name;
   int? age;
   double? height;
-  
-  factory UsersItem.fromJson(Map<String, dynamic> json) => ...
+
+  factory UsersItem.fromJson(Map<String, dynamic> json) =>
+
+  ...
 }
 ```
 
@@ -146,11 +170,13 @@ class UsersItem {
    ```
 
 ## Example:
+
 ```shell
 flutter pub run json5_model --src=lib/data/json --dist=lib/data/model
 ```
 
 json:
+
 ```json5
 {
   "id": 1296269,
@@ -185,6 +211,7 @@ json:
 ```
 
 Dart:
+
 ```dart
 import 'package:json_annotation/json_annotation.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -196,16 +223,16 @@ part 'github.g.dart';
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Github with EquatableMixin {
+class Github
+    with EquatableMixin {
 
-  Github(
-      {required this.id,
-        required this.nodeId,
-        required this.owner,
-        required this.private,
-        required this.topics,
-        required this.permissions,
-        required this.securityAndAnalysis});
+  Github({required this.id,
+    required this.nodeId,
+    required this.owner,
+    required this.private,
+    required this.topics,
+    required this.permissions,
+    required this.securityAndAnalysis});
 
   @JsonKey(name: "id", defaultValue: 0)
   final int id;
@@ -233,7 +260,14 @@ class Github with EquatableMixin {
 
   Map<String, dynamic> toJson() => _$GithubToJson(this);
 
-  factory Github.emptyInstance() => Github(id: 0, nodeId: "", owner: Owner.emptyInstance(), private: false, topics: [], permissions: Permissions.emptyInstance(), securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
+  factory Github.emptyInstance() =>
+      Github(id: 0,
+          nodeId: "",
+          owner: Owner.emptyInstance(),
+          private: false,
+          topics: [],
+          permissions: Permissions.emptyInstance(),
+          securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
 
   @override
   List<Object?> get props => _$props;
@@ -242,10 +276,10 @@ class Github with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Owner with EquatableMixin {
+class Owner
+    with EquatableMixin {
 
-  Owner(
-      {required this.login});
+  Owner({required this.login});
 
   @JsonKey(name: "login", defaultValue: "")
   final String login;
@@ -264,12 +298,12 @@ class Owner with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class Permissions with EquatableMixin {
+class Permissions
+    with EquatableMixin {
 
-  Permissions(
-      {required this.admin,
-        required this.push,
-        required this.pull});
+  Permissions({required this.admin,
+    required this.push,
+    required this.pull});
 
   @JsonKey(name: "admin", defaultValue: false)
   final bool admin;
@@ -294,10 +328,10 @@ class Permissions with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class AdvancedSecurity with EquatableMixin {
+class AdvancedSecurity
+    with EquatableMixin {
 
-  AdvancedSecurity(
-      {required this.status});
+  AdvancedSecurity({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
@@ -316,10 +350,10 @@ class AdvancedSecurity with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanning with EquatableMixin {
+class SecretScanning
+    with EquatableMixin {
 
-  SecretScanning(
-      {required this.status});
+  SecretScanning({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
@@ -338,16 +372,17 @@ class SecretScanning with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecretScanningPushProtection with EquatableMixin {
+class SecretScanningPushProtection
+    with EquatableMixin {
 
-  SecretScanningPushProtection(
-      {required this.status});
+  SecretScanningPushProtection({required this.status});
 
   @JsonKey(name: "status", defaultValue: "")
   final String status;
 
 
-  factory SecretScanningPushProtection.fromJson(Map<String, dynamic> json) => _$SecretScanningPushProtectionFromJson(json);
+  factory SecretScanningPushProtection.fromJson(Map<String, dynamic> json) =>
+      _$SecretScanningPushProtectionFromJson(json);
 
   Map<String, dynamic> toJson() => _$SecretScanningPushProtectionToJson(this);
 
@@ -360,7 +395,8 @@ class SecretScanningPushProtection with EquatableMixin {
 @CopyWith()
 @Autoequal()
 @JsonSerializable(explicitToJson: true)
-class SecurityAndAnalysis with EquatableMixin {
+class SecurityAndAnalysis
+    with EquatableMixin {
 
   SecurityAndAnalysis({required this.advancedSecurity,
     required this.secretScanning,
