@@ -1,3 +1,8 @@
+## [4.1.0] - 2025-4-30
+
+### Fixed
+Fixed illegal identifier handling
+
 ## [4.0.0] - 2025-4-29
 
 ### Changed
