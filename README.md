@@ -10,6 +10,7 @@ bugs. Note: The original @meta functionality from json_model is not supported.
 ## Installation
 
 Unix bash:
+
 ```shell
 dart pub add \
 json_annotation copy_with_extension equatable equatable_annotations \
@@ -17,6 +18,7 @@ dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_
 ```
 
 Windows Powershell:
+
 ```shell
 dart pub add |
 json_annotation copy_with_extension equatable equatable_annotations |
@@ -25,25 +27,33 @@ dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_
 
 ---
 
-## Version 5.0.0 and above: Use `equatable_gen` by default to replace `autoequal`, migration method as follows:
+## Version 5.0.0 and above: Use `equatable_gen` by default to replace
+`autoequal`, migration method as follows:
 
 There is a quick way to migrate the old code to `equatable_gen`.  
-Use the `--dist` parameter to specify the directory for the Dart model source code. Before migrating, a backup will be automatically created. You can specify the backup directory using the `--migr-autoequal-back <backup_dir>` parameter. If not specified, the default backup directory is `./migr_autoequal_back`.
+Use the `--dist` parameter to specify the directory for the Dart model source code. Before
+migrating, a backup will be automatically created. You can specify the backup directory using the
+`--migr-autoequal-back <backup_dir>` parameter. If not specified, the default backup directory is
+`./migr_autoequal_back`.
 
 ```shell
 dart pub run json5_model --dist=lib/data/model --migr-autoequal
 ```
 
 You can also migrate manually by replacing the following:
+
 1. `@Autoequal()` => `@generateProps`
 2. `@autoequal`  =>  `@generateProps`
 3. `@IgnoreAutoequal()` => `@ignore`
 4. `@IncludeAutoequal()` => `@include`
 5. replace import:
+
 ```dart
 import 'package:autoequal/autoequal.dart';
 ```
+
 =>
+
 ```dart
 import 'package:equatable_annotations/equatable_annotations.dart';
 ```
@@ -90,17 +100,19 @@ flutter pub run json5_model --keepsource
 
 ## Global Command Parameters
 
-| Parameter          | Description                                                        | Default Value |
-|--------------------|--------------------------------------------------------------------|---------------|
-| `--src`            | Specify JSON source directory                                      | ./jsons       |
-| `--dist`           | Specify output directory                                           | lib/models    |
-| `--nocopywith`     | Disable copyWith method generation                                 | false         |
-| `--noautoequal`    | Disable equality comparison generation                             | false         |
-| `--keepsource`     | Keep original JSON files (don't add _ prefix) after generation     | false         |
-| `--restore`        | Restore all renamed JSON files                                     | false         |
-| `--clean`          | Clean generated files                                              | false         |
-| `--no-file-prefix` | Disable auto-adding class name prefixes (may cause name conflicts) | false         |
-| `--prefix-regexp`  | Apply RegExp to filename to extract class name prefix              | (.+?)         |
+| Parameter               | Description                                                                                                   | Default Value         |
+|-------------------------|---------------------------------------------------------------------------------------------------------------|-----------------------|
+| `--src`                 | Specify JSON source directory                                                                                 | ./jsons               |
+| `--dist`                | Specify output directory                                                                                      | lib/models            |
+| `--nocopywith`          | Disable copyWith method generation                                                                            | false                 |
+| `--noautoequal`         | Disable equality comparison generation                                                                        | false                 |
+| `--keepsource`          | Keep original JSON files (don't add _ prefix) after generation                                                | false                 |
+| `--restore`             | Restore all renamed JSON files                                                                                | false                 |
+| `--clean`               | Clean generated files                                                                                         | false                 |
+| `--no-file-prefix`      | Disable auto-adding class name prefixes (may cause name conflicts)                                            | false                 |
+| `--prefix-regexp`       | Apply RegExp to filename to extract class name prefix                                                         | (.+?)                 |
+| `--migr-autoequal`      | Enable migration for the old version of autoequal.                                                            | false                 |
+| `--migr-autoequal-back` | Specify the backup directory when migrating the old version of autoequal. Default is "./migr_autoequal_back". | ./migr_autoequal_back |
 
 ## How It Works
 
@@ -290,12 +302,12 @@ class Github
 
   factory Github.emptyInstance() =>
       Github(id: 0,
-      nodeId: "",
-      owner: Owner.emptyInstance(),
-      private: false,
-      topics: [],
-      permissions: Permissions.emptyInstance(),
-      securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
+          nodeId: "",
+          owner: Owner.emptyInstance(),
+          private: false,
+          topics: [],
+          permissions: Permissions.emptyInstance(),
+          securityAndAnalysis: SecurityAndAnalysis.emptyInstance());
 
   @override
   List<Object?> get props => _$props;

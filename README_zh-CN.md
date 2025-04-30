@@ -29,22 +29,28 @@ dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_
 ## 5.0.0 以上版本默认使用 `equatable_gen` 替换 `autoequal`，迁移方法如下
 
 下面有快捷的方式将旧代码迁移到 `equatable_gen`，  
-使用 `--dist` 参数指定 Dart 模型源码的目录，迁移之前将会自动备份。您可以使用 `--migr-autoequal-back <backup_dir>` 参数指定备份文件存放的目录。如果未指定，则默认备份目录为 `./migr_autoequal_back`。
+使用 `--dist` 参数指定 Dart 模型源码的目录，迁移之前将会自动备份。您可以使用
+`--migr-autoequal-back <backup_dir>` 参数指定备份文件存放的目录。如果未指定，则默认备份目录为
+`./migr_autoequal_back`。
 
 ```shell
 dart pub run json5_model --dist=lib/data/model --migr-autoequal
 ```
 
 您也可以手动迁移，替换以下内容：
+
 1. `@Autoequal()` => `@generateProps`
 2. `@autoequal`  =>  `@generateProps`
 3. `@IgnoreAutoequal()` => `@ignore`
 4. `@IncludeAutoequal()` => `@include`
 5. replace import:
+
 ```dart
 import 'package:autoequal/autoequal.dart';
 ```
+
 =>
+
 ```dart
 import 'package:equatable_annotations/equatable_annotations.dart';
 ```
@@ -91,17 +97,19 @@ flutter pub run json5_model --keepsource
 
 ## 全局命令参数
 
-| 参数                 | 说明                                     | 默认值        |
-|--------------------|----------------------------------------|------------|
-| `--src`            | 指定JSON源文件目录                            | ./jsons    |
-| `--dist`           | 指定输出目录                                 | lib/models |
-| `--nocopywith`     | 禁用生成copyWith方法                         | false      |
-| `--noautoequal`    | 禁用生成相等性比较                              | false      |
-| `--keepsource`     | 生成后保留原始JSON文件（不添加_前缀）                  | false      |
-| `--restore`        | 恢复所有被重命名的JSON文件                        | false      |
-| `--clean`          | 清理生成的文件                                | false      |
-| `--no-file-prefix` | 禁止添加类名前缀，这可能造成类名冲突                     | false      |
-| `--prefix-regexp`  | 指定类名前缀正则，这会对文件名使用正则表达式获得的第一个匹配字符串为类名前缀 | (.+?)      |
+| 参数                      | 说明                                                      | 默认值                   |
+|-------------------------|---------------------------------------------------------|-----------------------|
+| `--src`                 | 指定JSON源文件目录                                             | ./jsons               |
+| `--dist`                | 指定输出目录                                                  | lib/models            |
+| `--nocopywith`          | 禁用生成copyWith方法                                          | false                 |
+| `--noautoequal`         | 禁用生成相等性比较                                               | false                 |
+| `--keepsource`          | 生成后保留原始JSON文件（不添加_前缀）                                   | false                 |
+| `--restore`             | 恢复所有被重命名的JSON文件                                         | false                 |
+| `--clean`               | 清理生成的文件                                                 | false                 |
+| `--no-file-prefix`      | 禁止添加类名前缀，这可能造成类名冲突                                      | false                 |
+| `--prefix-regexp`       | 指定类名前缀正则，这会对文件名使用正则表达式获得的第一个匹配字符串为类名前缀                  | (.+?)                 |
+| `--migr-autoequal`      | 为旧版本的 autoequal 启用迁移。                                   | false                 |
+| `--migr-autoequal-back` | 在迁移旧版本的 autoequal 时指定备份目录。默认值为 “./migr_autoequal_back”。 | ./migr_autoequal_back |
 
 ## 工作机制
 
