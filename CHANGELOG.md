@@ -1,3 +1,6 @@
+## [5.0.1] - 2025-5-1
+Update readme
+
 ## [5.0.0] - 2025-5-1
 ### Added
 Added `--migr-autoequal` flag to enable migration for the old version of autoequal.
