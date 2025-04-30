@@ -1,3 +1,17 @@
+## [5.0.0] - 2025-5-1
+### Added
+Added `--migr-autoequal` flag to enable migration for the old version of autoequal.
+
+Added `--migr-autoequal-back` option to specify the backup directory when migrating the old version of `autoequal`. Default is `./migr_autoequal_back`.
+
+### Changed
+Migrated `autoequal` functionality to `equatable_annotations` and `equatable_gen` to support more efficient code generation and improved compatibility with equatable package.
+
+Replaced old annotations (`@Autoequal`, `@autoequal`, etc.) with their new counterparts in equatable_annotations.
+
+### Fixed
+Fixed issues with the backup process, now compressing the source directory into a .zip file with a timestamp before performing the migration.
+
 ## [4.1.0] - 2025-4-30
 
 ### Fixed

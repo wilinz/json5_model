@@ -1,6 +1,6 @@
 name: json5_model
 description: Gernerating Dart model class from Json files with one command.
-version: 4.1.0
+version: 5.0.0
 homepage: https://github.com/wilinz/json5_model
 repository: https://github.com/wilinz/json5_model
 

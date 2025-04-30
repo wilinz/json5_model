@@ -9,25 +9,51 @@ bugs. Note: The original @meta functionality from json_model is not supported.
 
 ## Installation
 
-```yaml
-dependencies:
-  json_annotation: ^4.9.0
-  copy_with_extension: ^6.0.1
-  equatable: ^2.0.7
-  autoequal: ^0.9.1
-
-dev_dependencies:
-  json5_model: ^3.0.0
-  json_serializable: ^6.9.5
-  autoequal_gen: ^0.9.5
-  copy_with_extension_gen: ^6.0.1
-  build_runner: ^2.4.15
+Unix bash:
+```shell
+dart pub add \
+json_annotation copy_with_extension equatable equatable_annotations \
+dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_gen dev:build_runner
 ```
+
+Windows Powershell:
+```shell
+dart pub add |
+json_annotation copy_with_extension equatable equatable_annotations |
+dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_gen dev:build_runner
+```
+
+---
+
+## Version 5.0.0 and above: Use `equatable_gen` by default to replace `autoequal`, migration method as follows:
+
+There is a quick way to migrate the old code to `equatable_gen`.  
+Use the `--dist` parameter to specify the directory for the Dart model source code. Before migrating, a backup will be automatically created. You can specify the backup directory using the `--migr-autoequal-back <backup_dir>` parameter. If not specified, the default backup directory is `./migr_autoequal_back`.
+
+```shell
+dart pub run json5_model --dist=lib/data/model --migr-autoequal
+```
+
+You can also migrate manually by replacing the following:
+1. `@Autoequal()` => `@generateProps`
+2. `@autoequal`  =>  `@generateProps`
+3. `@IgnoreAutoequal()` => `@ignore`
+4. `@IncludeAutoequal()` => `@include`
+5.
+```dart
+   import 'package:autoequal/autoequal.dart';
+   ```
+=>
+   ```dart
+   import 'package:equatable_annotations/equatable_annotations.dart';
+   ```
+
+---
 
 ## Usage
 
-1. Create a directory named "jsons" in your project root
-2. Create or copy JSON files into the "jsons" directory
+1. Create a directory named "json" in your project root
+2. Create or copy JSON files into the "json" directory
 3. Examples:
 
 ```shell

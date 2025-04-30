@@ -8,25 +8,53 @@ json_model 改进版，支持解析嵌套json，支持json5文件，并修复了
 
 ## 安装
 
-```yaml
-dependencies:
-  json_annotation: ^4.9.0
-  copy_with_extension: ^6.0.1
-  equatable: ^2.0.7
-  autoequal: ^0.9.1
+Unix bash:
 
-dev_dependencies:
-  json5_model: ^3.0.0
-  json_serializable: ^6.9.5
-  autoequal_gen: ^0.9.5
-  copy_with_extension_gen: ^6.0.1
-  build_runner: ^2.4.15
+```shell
+dart pub add \
+json_annotation copy_with_extension equatable equatable_annotations \
+dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_gen dev:build_runner
 ```
+
+Windows Powershell:
+
+```shell
+dart pub add |
+json_annotation copy_with_extension equatable equatable_annotations |
+dev:json5_model dev:json_serializable dev:copy_with_extension_gen dev:equatable_gen dev:build_runner
+```
+
+---
+
+## 5.0.0 以上版本默认使用 `equatable_gen` 替换 `autoequal`，迁移方法如下
+
+下面有快捷的方式将旧代码迁移到 `equatable_gen`，  
+使用 `--dist` 参数指定 Dart 模型源码的目录，迁移之前将会自动备份。您可以使用 `--migr-autoequal-back <backup_dir>` 参数指定备份文件存放的目录。如果未指定，则默认备份目录为 `./migr_autoequal_back`。
+
+```shell
+dart pub run json5_model --dist=lib/data/model --migr-autoequal
+```
+
+您也可以手动迁移，替换以下内容：
+1. `@Autoequal()` => `@generateProps`
+2. `@autoequal`  =>  `@generateProps`
+3. `@IgnoreAutoequal()` => `@ignore`
+4. `@IncludeAutoequal()` => `@include`
+5.
+```dart
+   import 'package:autoequal/autoequal.dart';
+   ```
+=>
+   ```dart
+   import 'package:equatable_annotations/equatable_annotations.dart';
+   ```
+
+---
 
 ## 使用
 
-1. 在工程根目录下创建一个名为 "jsons" 的目录
-2. 创建或拷贝Json文件到"jsons" 目录中
+1. 在工程目录下创建一个名为 "json" 的目录
+2. 创建或拷贝Json文件到"json" 目录中
 3. 例子:
 
 ```shell
