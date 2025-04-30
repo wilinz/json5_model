@@ -11,6 +11,7 @@ class Class {
 
   Class(String name, this.rawName, this.fields) {
     _name = name
+        .sanitize()
         .underlineToHumpNaming(true) // 处理内置类冲突
         .safeName(); // 处理关键字冲突
   }
@@ -36,7 +37,7 @@ class Field {
   bool nullable;
 
   Field(this.type, String name, this.rawName, this.isLate, this.nullable) {
-    _name = name.underlineToHumpNaming(false).safeName(); // 字段名安全处理
+    _name = name.sanitize().underlineToHumpNaming(false).safeName(); // 字段名安全处理
   }
 
   String get name => _name;
@@ -514,6 +515,22 @@ extension StringExt on String {
       i++;
     }
     return str.toString();
+  }
+
+  String sanitize() {
+    // 替换所有非字母数字和下划线的字符为下划线
+    String sanitized = replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+    // 合并连续下划线
+    sanitized = sanitized.replaceAll(RegExp(r'_+'), '_');
+    // 去除首尾下划线
+    sanitized = sanitized.replaceAll(RegExp(r'^_+|_+$'), '');
+    // 处理空结果
+    if (sanitized.isEmpty) return 'empty';
+    // 处理数字开头
+    if (RegExp(r'^[0-9]').hasMatch(sanitized)) {
+      sanitized = 'n$sanitized';
+    }
+    return sanitized;
   }
 
 // 关键字处理（添加X后缀）
