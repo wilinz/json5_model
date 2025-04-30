@@ -40,14 +40,14 @@ dart pub run json5_model --dist=lib/data/model --migr-autoequal
 2. `@autoequal`  =>  `@generateProps`
 3. `@IgnoreAutoequal()` => `@ignore`
 4. `@IncludeAutoequal()` => `@include`
-5.
+5. replace import:
 ```dart
-   import 'package:autoequal/autoequal.dart';
-   ```
+import 'package:autoequal/autoequal.dart';
+```
 =>
-   ```dart
-   import 'package:equatable_annotations/equatable_annotations.dart';
-   ```
+```dart
+import 'package:equatable_annotations/equatable_annotations.dart';
+```
 
 ---
 

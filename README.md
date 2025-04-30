@@ -39,14 +39,14 @@ You can also migrate manually by replacing the following:
 2. `@autoequal`  =>  `@generateProps`
 3. `@IgnoreAutoequal()` => `@ignore`
 4. `@IncludeAutoequal()` => `@include`
-5.
+5. replace import:
 ```dart
-   import 'package:autoequal/autoequal.dart';
-   ```
+import 'package:autoequal/autoequal.dart';
+```
 =>
-   ```dart
-   import 'package:equatable_annotations/equatable_annotations.dart';
-   ```
+```dart
+import 'package:equatable_annotations/equatable_annotations.dart';
+```
 
 ---
 
