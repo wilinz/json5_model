@@ -3,6 +3,7 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 import 'build_runner.dart' as br;
 import 'package:json5/json5.dart';
+import 'package:archive/archive.dart';
 
 class Class {
   late String _name;
@@ -110,6 +111,8 @@ Future<void> main(List<String> args) async {
   String? dist;
   String? tag;
   String? prefixRegexp;
+  String? migrAutoequalBack;
+  bool migrAutoequal = false;
   bool noCopyWith = false;
   bool noAutoequal = false;
   bool noFilePrefix = false;
@@ -168,6 +171,21 @@ Future<void> main(List<String> args) async {
   );
 
   parser.addFlag(
+    'migr-autoequal',
+    callback: (v) => migrAutoequal = v,
+    help: 'Enable migration for the old version of autoequal.',
+    negatable: false,
+  );
+
+  parser.addOption(
+    'migr-autoequal-back',
+    defaultsTo: './migr_autoequal_back',
+    callback: (v) => migrAutoequalBack = v,
+    help:
+        'Specify the backup directory when migrating the old version of autoequal. Default is "./migr_autoequal_back".',
+  );
+
+  parser.addFlag(
     'restore',
     callback: (v) => restore = v,
     help: "Restore all JSON files that were renamed with '_' prefix",
@@ -186,7 +204,10 @@ Future<void> main(List<String> args) async {
 
   parser.parse(args);
 
-  if (restore) {
+  if (migrAutoequal) {
+    performMigrationAutoequal(dist!, migrAutoequalBack!);
+    await br.run(['build', '--delete-conflicting-outputs']);
+  } else if (restore) {
     restoreRenamedFiles(src!);
   } else if (clean) {
     br.run(['clean']);
@@ -396,13 +417,14 @@ bool generateModelClass(
           importSet.add(
               "import 'package:copy_with_extension/copy_with_extension.dart'");
         }
+
         if (!noAutoequal) {
-          annotations.write("@Autoequal()\n");
+          annotations.write("@generateProps\n");
           autoEqualMixin.write("with EquatableMixin ");
           autoEqualProps
               .write("@override\n  List<Object?> get props => _\$props;");
           importSet.add("import 'package:equatable/equatable.dart'");
-          importSet.add("import 'package:autoequal/autoequal.dart'");
+          importSet.add("import 'package:equatable_annotations/equatable_annotations.dart'");
         }
 
 // 使用新的占位符值调用 replaceTemplate
@@ -832,3 +854,104 @@ void restoreRenamedFiles(String srcDir) {
     }
   });
 }
+
+// ----------------------------migrationAutoequal-------------------------------
+void performMigrationAutoequal(String srcDirectory, String backupDirectory) async {
+  final directories = _initializeDirectories(srcDirectory, backupDirectory);
+  if (directories == null) return;
+
+  // Step 1: First, compress the entire source directory with timestamp
+  await _backupDirectoryAsZip(directories['source']!, directories['backup']!);
+
+  // Step 2: Then, perform the Dart file migration
+  await _migrationAutoequal(directories['source']!, directories['backup']!);
+}
+
+// Initialize source and backup directories
+Map<String, Directory>? _initializeDirectories(
+    String srcDirectory, String backupDirectory) {
+  final sourceDir = Directory(srcDirectory);
+  final backupDir = Directory(backupDirectory);
+
+  // Check if the source directory exists
+  if (!sourceDir.existsSync()) {
+    print('The specified source directory does not exist.');
+    return null;
+  }
+
+  // Check if the backup directory exists, if not, create it
+  if (!backupDir.existsSync()) {
+    backupDir.createSync(recursive: true);
+    print('Backup directory created: ${backupDir.path}');
+  }
+
+  return {'source': sourceDir, 'backup': backupDir};
+}
+
+// Step 1: Compress the entire source directory into a zip file with a timestamp
+Future<void> _backupDirectoryAsZip(Directory srcDirectory, Directory backupDirectory) async {
+  final archive = Archive();
+
+  // Add the entire source directory to the archive
+  await _addDirectoryToArchive(srcDirectory, archive, srcDirectory.path);
+
+  // Create a timestamp for the backup file name
+  final timestamp = DateTime.now().toString().replaceAll(RegExp(r'[^0-9]'), ''); // Remove non-numeric characters
+  final zipFilePath = '${backupDirectory.path}/migr-autoequal-backup-$timestamp.zip';
+  final zipFile = File(zipFilePath);
+
+  // Create the zip file and write it to the backup location
+  final encoder = ZipEncoder();
+  final zipData = encoder.encode(archive);
+
+  await zipFile.writeAsBytes(zipData);
+  print('Source directory backed up as zip: $zipFilePath');
+}
+
+// Add all files in the directory (and subdirectories) to the archive
+Future<void> _addDirectoryToArchive(Directory dir, Archive archive, String rootPath) async {
+  final files = dir.listSync(recursive: true, followLinks: false);
+
+  for (var file in files) {
+    if (file is File) {
+      final relativePath = file.path.substring(rootPath.length + 1);
+      final fileBytes = await file.readAsBytes();
+      archive.addFile(ArchiveFile(relativePath, fileBytes.length, fileBytes));
+    }
+  }
+}
+
+// Step 2: Process the Dart files for migration
+Future<void> _migrationAutoequal(Directory srcDirectory, Directory backupDirectory) async {
+  final dartFiles = srcDirectory.listSync(recursive: true, followLinks: false)
+      .where((file) => file is File && file.path.endsWith('.dart'));
+
+  for (var file in dartFiles) {
+    await _processFile(file as File, srcDirectory);
+  }
+}
+
+// Process each Dart file for migration
+Future<void> _processFile(File file, Directory srcDirectory) async {
+  try {
+    String content = await file.readAsString();
+
+    // Apply the replacement rules
+    content = content.replaceAll(RegExp(r'@Autoequal\(\)'), '@generateProps');
+    content = content.replaceAll(RegExp(r'@autoequal'), '@generateProps');
+
+    content = content.replaceAll(RegExp(r'@IgnoreAutoequal\(\)'), '@ignore');
+
+    content = content.replaceAll(RegExp(r'@IncludeAutoequal\(\)'), '@include');
+
+    content = content.replaceAll(RegExp(r"package:autoequal/autoequal.dart"),
+        "package:equatable_annotations/equatable_annotations.dart");
+
+    // Save the modified content back to the original file
+    await file.writeAsString(content);
+    print('Processed file: ${file.path}');
+  } catch (e) {
+    print('Error processing file ${file.path}: $e');
+  }
+}
+// ----------------------------migrationAutoequal-------------------------------

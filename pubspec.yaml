@@ -17,6 +17,8 @@ dependencies:
   build_runner: ^2.4.6
   path: ^1.8.3
   json5: ^0.8.0
+  archive: ^4.0.7
+
 dev_dependencies:
   test: ^1.24.5
   lint: ^2.1.2
